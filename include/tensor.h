@@ -11,7 +11,13 @@ public:
     ptr_ = (float*) calloc(shape_.getTotal() * sizeof(float));
   }
 
-  tuple<> getShape() {
+  shape getShape() {
+    return shape_;
+  }
+
+  // Would be extended to getCPUPtr & getGPUPtr
+  float* getPtr() {
+    return ptr_;
   }
 
 private:

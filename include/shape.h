@@ -11,7 +11,7 @@ class shape {
 
   size_t getDim(int k) {
     assert(k <= 3);
-    return std::get<k>(shape_);
+    return std::get<k-1>(shape_);
   }
 
   size_t getTotal() {
