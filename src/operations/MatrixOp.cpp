@@ -1,3 +1,5 @@
+#include<math.h>
+#include<operations/MatrixOp.h>
 
 namespace MLLib{
 
@@ -55,6 +57,62 @@ namespace matrix{
         v[i] = value;
       }
     }
+  }
+
+  /* Subtract two matrixes
+   *  omega = alpha - beta
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   *   - omegarow, col)
+   */
+  void eleSubtract(float* a, float* b, float* c, int row, int col) {
+    for (int i = 0; i < col; ++i)
+      for (int j = 0; j < row; ++j)
+        omega[pos(j, i, col)] = alpha[pos(j, i, col)] - beta[pos(j, i, col)];
+  }
+
+  /* Element Square matrixes
+   *  beta = alpha^2
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void eleSquare(float* alpha, float* beta, int row, int col) {
+    for (int i = 0; i < col; ++i)
+      for (int j = 0; j < row; ++j)
+        beta[pos(j, i, col)] = pow(alpha[pos(j, i, col)],2);
+  }
+
+  /* reduceToValue
+   *  v = sum(alpha)
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   */
+  void reduceToValue(float* alpha, float* value, int row, int col) {
+    float tmp = 0;
+    for (int i = 0; i < col; ++i)
+      for (int j = 0; j < row; ++j)
+        tmp += alpha[pos(j, i, col)];
+    *value = tmp;
+  }
+
+  /* linearOp
+   *  beta = alpha * b + c
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void scaleMatrix(float* alpha, float* beta, int row, int col, float scale, float bias = 0) {
+    float value = 0;
+    for (int i = 0; i < col; ++i)
+      for (int j = 0; j < row; ++j)
+        beta[pos(j, i, col)] += alpha[pos(j, i, col)] * scale;
+    *matrix = value;
   }
 
 }

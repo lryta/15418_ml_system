@@ -1,3 +1,4 @@
+#include <math.h>
 #include "L2LossLayer.h"
 
 namespace MLLib {
@@ -9,18 +10,18 @@ void L2LossLayer::forward(vecotr<Tensor> &ins) {
   auto t_shape = ins[1].getShape();
   auto inter_shape = inter_.getShape();
   // inter = (p - t)
-  matrix::subtract(ins[0].getData(), ins[1].getDelta(),
+  matrix::eleSubtract(ins[0].getData(), ins[1].getDelta(),
       inter_.getData(), ins[0].getDim(1), ins[0].getDim(2));
   // inter_sqrt = inter ^ 2
-  matrix::square(inter_square_.getData(), inter_.getData(), ins[0].getDim(1), ins[0].getDim(2));
+  matrix::eleSquare(inter_square_.getData(), inter_.getData(), ins[0].getDim(1), ins[0].getDim(2));
   // loss = sum(inter_square_)
-  matrix::sum(&loss_, inter_square_.getData(), inter_shape.getDim(1), inter_shape.getDim(1));
-  loss_ = std::sqrt(loss_);
+  matrix::reduceToValue(&loss_, inter_square_.getData(), inter_shape.getDim(1), inter_shape.getDim(1));
+  loss_ = sqrt(loss_);
 }
 
 void L2LossLayer::backward(vecotr<Tensor> &ins) {
   //  ins[0].delta = inter_data * 1/loss_
-  matrix::multi(ins[0].getDelta(), 1/loss_, inter_.getData(), ins[0].getDim(1), ins[0].getDim(2));
+  matrix::scaleMatrix(ins[0].getDelta(), inter_.getData(), ins[0].getDim(1), ins[0].getDim(2), 1/loss_);
 }
 
 }
