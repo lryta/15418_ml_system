@@ -68,9 +68,9 @@ namespace matrix{
    *   - omegarow, col)
    */
   void eleSubtract(float* a, float* b, float* c, int row, int col) {
-    for (int i = 0; i < col; ++i)
-      for (int j = 0; j < row; ++j)
-        omega[pos(j, i, col)] = alpha[pos(j, i, col)] - beta[pos(j, i, col)];
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        omega[pos(i, j, col)] = alpha[pos(i, j, col)] - beta[pos(i, j, col)];
   }
 
   /* Element Square matrixes
@@ -81,9 +81,9 @@ namespace matrix{
    *   - beta (row, col)
    */
   void eleSquare(float* alpha, float* beta, int row, int col) {
-    for (int i = 0; i < col; ++i)
-      for (int j = 0; j < row; ++j)
-        beta[pos(j, i, col)] = pow(alpha[pos(j, i, col)],2);
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        beta[pos(i, j, col)] = pow(alpha[pos(i, j, col)],2);
   }
 
   /* reduceToValue
@@ -94,9 +94,9 @@ namespace matrix{
    */
   void reduceToValue(float* alpha, float* value, int row, int col) {
     float tmp = 0;
-    for (int i = 0; i < col; ++i)
-      for (int j = 0; j < row; ++j)
-        tmp += alpha[pos(j, i, col)];
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        tmp += alpha[pos(i, j, col)];
     *value = tmp;
   }
 
@@ -109,10 +109,24 @@ namespace matrix{
    */
   void scaleMatrix(float* alpha, float* beta, int row, int col, float scale, float bias = 0) {
     float value = 0;
-    for (int i = 0; i < col; ++i)
-      for (int j = 0; j < row; ++j)
-        beta[pos(j, i, col)] += alpha[pos(j, i, col)] * scale;
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        beta[pos(i, j, col)] += alpha[pos(i, j, col)] * scale;
     *matrix = value;
+  }
+
+  /* multiEle 
+   *  omega = alpha * beta
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta  (row, col)
+   *   - omega (row, col)
+   */
+  void multiEle(float* alpha, float* beta, float* omega, int row, int col) {
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        omega[pos(i, j, col)] += alpha[pos(i, j, col)] * beta[pos(i, j, col)];
   }
 
 }

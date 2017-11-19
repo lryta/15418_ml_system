@@ -66,7 +66,26 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void scaleMatrix(float* alpha, float* beta, int row, int col, float scale, float bias = 0);
+  void linearOp(float* alpha, float* beta, int row, int col, float scale, float bias = 0);
+
+  /* multiEle 
+   *  omega = alpha * beta
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta  (row, col)
+   *   - omega (row, col)
+   */
+  void multiEle(float* alpha, float* beta, float* omega, int row, int col);
+
+  /* sigmoidOp 
+   *  beta = 1 / (1 + exp(-alpha))
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void sigmoidOp(float* alpha, float* beta, int row, int col);
 
 }
 }
