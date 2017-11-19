@@ -11,6 +11,12 @@ public:
     ptr_ = (float*) calloc(shape_.getTotal() * sizeof(float));
   }
 
+  // TODO: copy constructor of shape
+  Tensor(Tensor& src) {
+    shape_ = src.shape_;
+    ptr_ = (float*) calloc(shape_.getTotal() * sizeof(float));
+  }
+
   shape getShape() {
     return shape_;
   }
