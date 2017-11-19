@@ -4,10 +4,18 @@
 namespace MLLib {
 
 // shape has at most three dim at present
-class shape {
+class Shape {
  public:
-  shape(size_t d0, size_t d1, size_t d2):
+  Shape(size_t d0, size_t d1, size_t d2):
     shape_(make_tuple(d0, d1, d2)), total_(d0 * d1 * d2) {
+  }
+
+  Shape(size_t d0, size_t d1):
+    shape_(make_tuple(d0, d1, 1)), total_(d0 * d1) {
+  }
+
+  Shape(size_t d0):
+    shape_(make_tuple(d0, 1, 1)), total_(d0) {
   }
 
   size_t getDim(int k) {
