@@ -10,7 +10,7 @@ void L2LossLayer::forward(vecotr<Tensor> &ins) {
   auto t_shape = ins[1].getShape();
   auto inter_shape = inter_.getShape();
   // inter = (p - t)
-  matrix::eleSubtract(ins[0].getData(), ins[1].getDelta(),
+  matrix::eleSubtract(ins[0].getData(), ins[1].getDrad(),
       inter_.getData(), ins[0].getDim(1), ins[0].getDim(2));
   // inter_sqrt = inter ^ 2
   matrix::eleSquare(inter_square_.getData(), inter_.getData(), ins[0].getDim(1), ins[0].getDim(2));
@@ -21,7 +21,7 @@ void L2LossLayer::forward(vecotr<Tensor> &ins) {
 
 void L2LossLayer::backward(vecotr<Tensor> &ins) {
   //  ins[0].delta = inter_data * 1/loss_
-  matrix::scaleMatrix(ins[0].getDelta(), inter_.getData(), ins[0].getDim(1), ins[0].getDim(2), 1/loss_);
+  matrix::scaleMatrix(ins[0].getDrad(), inter_.getData(), ins[0].getDim(1), ins[0].getDim(2), 1/loss_);
 }
 
 }
