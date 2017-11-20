@@ -35,7 +35,6 @@ class SigmoidLayer: ActivationLayer {
   void initIntermediateState(vector<shape> &ins, vector<shape> &ous) {
     inter_ = tensor(ins[0]);
   }
-
 };
 
 }
