@@ -1,5 +1,12 @@
 #include "optim.h"
 
+namespace MLLib {
+
+struct Settings {
+  float lr; // learning rate
+  float momentum;
+  float weightDecay;
+}
 
 SGD::SGD(Settings setting) {
   settings = setting;
@@ -29,4 +36,6 @@ SGD::reset() {
   for (auto &i : velocity) {
     i.setZeros();
   }
+}
+
 }

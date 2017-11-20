@@ -1,14 +1,10 @@
 #include "solver.h"
 
+namespace MLLib {
 
-Solver::Solver(Optimizer* ioptim,
-    DataIterator itrainIter,
-    DataIterator ivalidIter,
-    DataIterator itestIter) {
-  optim = ioptim;
-  trainIter = itrainIter;
-  validIter = ivalidIter;
-  testIter = itestIter;
+Solver::Solver(Optimizer* ioptim, DataIterator itrainIter,
+  DataIterator ivalidIter, DataIterator itestIter)
+  :optim(ioptim), trainIter(itrainIter), validIter(ivalidIter), testIter(itestIter){
 }
 
 Solver::train(int epoch) {
@@ -19,5 +15,8 @@ Solver::train(int epoch) {
       Tensor* X = std::get<0>(trainIter);
       Tensor* Y = std::get<1>(trainIter);
     }
+
   }
+}
+
 }

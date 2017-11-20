@@ -1,30 +1,68 @@
 #include <vector>
 #include "net.h"
 #include "layer.h"
+#include "layers/FullyConnectedLayer.h"
+#include "layers/L2LossLayer.h"
+#include "layers/ActivationLayer.h"
 
+namespace MLLib {
 
-LogReg::LogReg(size_t inputDim, size_t hiddenDim):
-  inputDim_(inputDim), hiddenDim_(hiddenDim) {
-    layers_.emplace_back(FullyConnectedLayer(inputDim, hiddenDim));
-    layers_.emplace_back(SigmoidLayer());
-    layers_.emplace_back(NLLSigmoidLayer());
+using std::vector;
+
+void MLPNet::buildLayers(shape input, vector<size_t> hiddenDims) {
+  shape in_shape, out_shape;
+  in_shape = input;
+
+  for (auto const& hiddenDim : hiddenDim) {
+    layers_.push_back(new FullyConnectedLayer(in_shape, out_shape, hiddenDim));
+    intermediate_tensors_.push_back(new Tensor(out_shape));
+
+    in_shape = out_shape;
+    layers_.push_back(new SigmoidLayer(in_shape, out_shape));
+    intermediate_tensors_.push_back(new Tensor(out_shape));
+
+    in_shape = out_shape;
   }
 
-SeqNet::forward(const std::vector<Tensor>& ins, std::vector<Tensor>& ous) {
-  size_t n = layers_.size();
-  if (1 == n) {
-    layers_[0].forward(ins, ous);
-  } else {
-    std::vector<Tensor> tmps[n-1];
-    layers_[0].forward(ins, tmps[0]);
-    for (int i = 1; i < layers_.size() - 1; ++i) {
-      layers_[i].forward(tmps[i-1], tmps[i]);
-    layers_[n-1].forward(tmps[n-2], ous);
-  }
+  // TODO(Larry): replace l2 to nll-sigmoid layer
+  // TODO(Larry): Define nll-sigmoid layer
+  auto target_shape = in_shape;
+  layers_.push_back(new L2LossLayer({in_shape, target_shape}, {}));
 }
 
-SeqNet::backward(std::vector<Tensor> &ins) {
-  for (int i = layers_.size() - 1; i >=0; --i) {
-
+vector<Tensor*> getParams() {
+  if (params_.size() == 0) {
+    for (auto const& layer : layers_) {
+      auto layer_param = layers.getParams();
+      std::insert(param_.end(), layer_param.begin(), layer_param.end());
+    }
   }
+
+  return params_;
+}
+
+MLPNet::~MLP() {
+  for (auto const& ts : intermediate_tensors_)
+    delete ts;
+
+  for (auto const& layer : intermediate_tensors_)
+    delete layer;
+}
+
+MLPNet::forward(vector<Tensor*> ins, vector<Tensor*> targets) {
+  assert(layers.size() > 1);
+
+  for (int i = 0; i < layers_.size() - 1; ++i)
+    layers_[i].forward((i == 0)?(ins[0]):intermediate_tensors_[i-1], intermediate_tensors_[i]);
+
+  layers_[layers_.size() - 1].forward({intermediate_tensors_[layers_.size()-2], targets[0]}, {});
+}
+
+SeqNet::backward(vector<Tensor*> ins, vector<Tensor*> targets) {
+  layers_[layers_.size() - 1].backword({ins[0], targets[0]}, {});
+
+  for (int i = layers_.size() - 1; i >= 0; --i)
+    layers_[i].backward((i == 0)?(ins[0]):intermediate_tensors_[i-1], intermediate_tensors_[i]);
+}
+
 }

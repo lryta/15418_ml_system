@@ -5,7 +5,7 @@
 namespace MLLib {
 
 class Tensor {
-public:
+ public:
   // matrix M * N
   Tensor(shape s):shape_(s) {
     ptr_ = (float*) calloc(shape_.getTotal() * sizeof(float));
@@ -17,6 +17,9 @@ public:
     ptr_ = (float*) calloc(shape_.getTotal() * sizeof(float));
   }
 
+  // TODO: Add Grad()
+  // TODO: Add De-Allocator()
+
   shape getShape() {
     return shape_;
   }
@@ -26,7 +29,7 @@ public:
     return ptr_;
   }
 
-private:
+ private:
   shape shape_;
   float *ptr_;
 };
