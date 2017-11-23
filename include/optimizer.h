@@ -1,11 +1,24 @@
 #include <string>
 #include <vector>
-#include <unordered_map>
 #include "tensor.h"
+#include "operations/matrixOp.h"
 
 namespace MLLib {
 
-struct OptimizerConfig;
+struct OptimizerConfig {
+  OptimizerConfig(float lr,
+      bool use_m = false, bool m = 0,
+      bool use_w = false, bool w = 0): 
+    lr(lr), use_monmentum(use_m), m(momentum),
+    use_weightDecay(use_w), weightDecay(w)
+  {}
+
+  float lr; // learning rate
+  bool use_monmentum;
+  float momentum;
+  bool use_weightDecay;
+  float weightDecay;
+}
 
 class Optimizer {
  public:
@@ -15,7 +28,7 @@ class Optimizer {
   virtual void registerParams(Layer curLayer);
 }
 
-class SGD : Optimizer {
+class SGDOptimizer : Optimizer {
  public:
   SGD(OptimizerConfig setting);
 

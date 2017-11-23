@@ -87,5 +87,14 @@ namespace matrix{
    */
   void sigmoidOp(float* alpha, float* beta, int row, int col);
 
+  /* linearOpInplace 
+   *  alpha = alpha * a + beta*b + c
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void linearOpInplace(float* alpha, float* beta, int row, int col, float a, float b, float c = 0);
+
 }
 }

@@ -20,10 +20,6 @@ class MLPNet : Net {
 
   vector<Tensor*> getParams();
 
-  
-
-
-
  private:
   void buildLayers(shape in_shape, vector<size_t> hidden_dims);
 

@@ -107,12 +107,11 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void scaleMatrix(float* alpha, float* beta, int row, int col, float scale, float bias = 0) {
-    float value = 0;
+  void linearOp(float* alpha, float* beta, int row,
+      int col, float scale, float bias = 0) {
     for (int i = 0; i < row; ++i)
       for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] += alpha[pos(i, j, col)] * scale;
-    *matrix = value;
+        beta[pos(i, j, col)] = alpha[pos(i, j, col)] * scale + bias;
   }
 
   /* multiEle 
@@ -127,6 +126,20 @@ namespace matrix{
     for (int i = 0; i < row; ++i)
       for (int j = 0; j < col; ++j)
         omega[pos(i, j, col)] += alpha[pos(i, j, col)] * beta[pos(i, j, col)];
+  }
+
+  /* linearOpInplace 
+   *  alpha = alpha * a + beta*b + c
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void linearOpInplace(float* alpha, float* beta, int row, int col, float a, float b, float c = 0) {
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        beta[pos(i, j, col)] = beta[pos(i, j, col)] * a
+          alpha[pos(i, j, col)] * b + c;
   }
 
 }
