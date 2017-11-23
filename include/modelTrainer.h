@@ -16,7 +16,11 @@ class trainerConfig {
 //TODO: Not sure we want to support test()
 class modelTrainer {
  public:
-  modelTrainer(NNType, std::vector<int>, trainerConfig);
+  modelTrainer(trainerConfig);
+
+  void setModel(NNType, std::vector<int>);
+  void setOptimizer(optimizerConfig);
+
   void train(int epoch);
 
  private:

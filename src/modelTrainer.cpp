@@ -2,21 +2,10 @@
 
 namespace MLLib {
 
-modelTrainer::modelTrainer(NNType type,
-    std::vector<int> inter_dimes, trainerConfig config)
+modelTrainer::modelTrainer(trainerConfig config)
   :config_(config) {
 
   data_iter_ = new dataIterator(config_.batch_num_);
-
-  switch (type) {
-    case NNType::MLPNet:
-      assert(inter_dims.size() > 0);
-      net_ = new MLPNet(data_iter_.getDataShape(), inter_dims);
-    default:
-      throw "Network Type not recognized"
-  }
-
-  weight_updater_.register(net->getParams());
 }
 
 modelTrainer::~modelTrainer() {
@@ -25,7 +14,31 @@ modelTrainer::~modelTrainer() {
   delete net_;
 }
 
+void modelTrainer::setModel(NNType type, std::vector<int> inter_dims) {
+  if (weight_updater_ != NULL)
+    throw "setModel() should be called before setOptimizer()";
+
+  switch (type) {
+    case NNType::MLPNet:
+      assert(inter_dims.size() > 0);
+      net_ = new MLPNet(data_iter_.getDataShape(), inter_dims);
+    default:
+      throw "Network Type not recognized"
+  }
+}
+
+void modelTrainer::setOptimizer(optimizerConfig config) {
+  if (net_ == NULL)
+    throw "setModel() should be called before setOptimizer()";
+
+  weight_updater_ = new SGDoptimizer(opt_config);
+  weight_updater_->register(net_->getParams());
+}
+
 void modelTrainer::train() {
+  if (weight_updater_ == NULL)
+    throw "setOptimizer() should be called before train()";
+
   for (int i = 0; i < config_.epoch; ++i) {
     // Reset iterator at very beginning
     data_iter_.start();
