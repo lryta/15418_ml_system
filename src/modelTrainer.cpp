@@ -2,27 +2,39 @@
 
 namespace MLLib {
 
-modelTrainer::modelTrainer(net n,
-    , DataIterator *itrainIter,
-  int epoch)
-  :correctly_labelled_num_(0), labelled_num_(0),
-  net_(n), weight_updater_(), trainIter(itrainIter),
-  config_(epoch) {
+modelTrainer::modelTrainer(NNType type,
+    std::vector<int> inter_dimes, trainerConfig config)
+  :config_(config) {
+
+  data_iter_ = new dataIterator(config_.batch_num_);
+
+  switch (type) {
+    case NNType::MLPNet:
+      assert(inter_dims.size() > 0);
+      net_ = new MLPNet(data_iter_.getDataShape(), inter_dims);
+    default:
+      throw "Network Type not recognized"
+  }
 
   weight_updater_.register(net->getParams());
-  trainIter.setBatchSize();
+}
+
+modelTrainer::~modelTrainer() {
+  delete data_iter_;
+  delete weight_updater_;
+  delete net_;
 }
 
 void modelTrainer::train() {
   for (int i = 0; i < config_.epoch; ++i) {
     // Reset iterator at very beginning
-    trainIter.start();
+    data_iter_.start();
 
     labelled_num_ = 0;
     correctly_labelled_num_ = 0;
 
     while (trainIter.hasNext()) {
-      auto data = train_iter_.next();
+      auto data = data_iter_.next();
       auto input = std::get<0>(data);
       auto target = std::get<1>(data);
       // forward
