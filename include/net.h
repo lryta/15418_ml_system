@@ -4,8 +4,6 @@
 namespace MLLib {
 class Net {
  public:
-  //std::tuple<float, int> forward(const vector<Tensor> &ins, vector<Tensor> &ous); // return (loss, acc)
-  // expose the loss & accuracy
   void foward(vector<Tensor*> ins, vector<Tensor*> targets);
   void backward(vector<Tensor*> ins, vector<Tensor*> targets);
 
@@ -17,9 +15,13 @@ class MLPNet : Net {
   MLP(shape in_shape, vector<size_t> hidden_dims):Net() {
     buildLayers(in_shape, hidden_dims);
   }
+
   ~MLP();
 
   vector<Tensor*> getParams();
+
+  
+
 
 
  private:

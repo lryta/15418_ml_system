@@ -5,24 +5,24 @@
 
 namespace MLLib {
 
-struct Settings;
+struct OptimizerConfig;
 
 class Optimizer {
-  public:
-    Optimizer(Settings setting);
-    virtual void update();
-    virtual void reset();
-    virtual void registerParams(Layer curLayer);
+ public:
+  Optimizer(OptimizerConfig setting);
+  virtual void update();
+  virtual void reset();
+  virtual void registerParams(Layer curLayer);
 }
 
 class SGD : Optimizer {
-  public:
-    SGD(Settings setting);
+ public:
+  SGD(OptimizerConfig setting);
 
-  private:
-    Settings settings;
-    std::vector<Tensor*> weights;
-    std::vector<Tensor> velocity;
+ private:
+  Settings settings;
+  std::vector<Tensor*> weights;
+  std::vector<Tensor*> velocity;
 }
 
 }

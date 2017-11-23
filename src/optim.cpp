@@ -2,37 +2,49 @@
 
 namespace MLLib {
 
-struct Settings {
+struct OptimizerConfig {
+  bool use_monmentum;
   float lr; // learning rate
   float momentum;
   float weightDecay;
 }
 
-SGD::SGD(Settings setting) {
-  settings = setting;
+SGD::SGD(OptimizerConfig config) {
+  config_ = config;
 }
 
-SGD::registerParams(std::vector<Tensor*> params) {
+void SGD::registerParams(std::vector<Tensor*> params) {
   for (auto &param : params) {
     weights.push_back(param);
-    velocity.push_back(zerosLike(param));
+
+    if (config_.use_monmentum)
+      velocity.push_back(zerosLike(param));
   }
 }
 
-SGD::update() {
+// CR(Haoran): I suggest avoid using velocity at first
+// if you don't have enough time to finish
+
+// TODO (Larry): Use Matrix Op.
+// Tensor class doesn't have arithmetic operation definitions.
+void SGD::update() {
   for (int i = 0; i < weights.size(); ++i) {
-    v = velocity[i];
-    v = settings.momentum * v + settings.lr * weights[i]->grad;
-    velocity[i] = v;
-    if (settings.weightDecay != 0) {
-      Tensor decay = settings.weightDecay * weights[i]->data;
+    if (config_.use_monmentum)
+      velocity[i] = config_.momentum * velocity[i]
+        + config_.lr * weights[i]->grad;
+
+    if (config_.weightDecay != 0) {
+      // TODO: use decay as a .
+      Tensor decay = config_.weightDecay * weights[i]->data;
       weights[i]->data -= decay;
     }
+    // TODO: no learning rate here?
+    // Please use the inplace_add_operation
     weights[i]->data -= weights[i]->grad;
   }
 }
 
-SGD::reset() {
+void SGD::reset() {
   for (auto &i : velocity) {
     i.setZeros();
   }

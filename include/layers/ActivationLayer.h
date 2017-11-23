@@ -26,7 +26,6 @@ class ActivationLayer:Layer {
   }
 };
 
-
 class SigmoidLayer: ActivationLayer {
  public:
   SigmoidLayer(vector<shape> &ins, vector<shape> &ous):ActivationLayer(ins, ous) {
