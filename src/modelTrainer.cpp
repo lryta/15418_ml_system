@@ -4,8 +4,7 @@ namespace MLLib {
 
 modelTrainer::modelTrainer(trainerConfig config)
   :config_(config) {
-
-  data_iter_ = new dataIterator(config_.batch_num_);
+  data_iter_ = new MNISTIterator(config_.dataset_dir_, config_.batch_num_);
 }
 
 modelTrainer::~modelTrainer() {
@@ -14,16 +13,16 @@ modelTrainer::~modelTrainer() {
   delete net_;
 }
 
-void modelTrainer::setModel(NNType type, std::vector<int> inter_dims) {
+void modelTrainer::setModel(ModelType type, std::vector<int> inter_dims) {
   if (weight_updater_ != NULL)
     throw "setModel() should be called before setOptimizer()";
 
   switch (type) {
-    case NNType::MLPNet:
+    case ModelType::MLPNet:
       assert(inter_dims.size() > 0);
       net_ = new MLPNet(data_iter_.getDataShape(), inter_dims);
     default:
-      throw "Network Type not recognized"
+      throw "Network Type not recognized";
   }
 }
 
@@ -31,7 +30,7 @@ void modelTrainer::setOptimizer(optimizerConfig config) {
   if (net_ == NULL)
     throw "setModel() should be called before setOptimizer()";
 
-  weight_updater_ = new SGDoptimizer(opt_config);
+  weight_updater_ = new SGDoptimizer(config);
   weight_updater_->register(net_->getParams());
 }
 

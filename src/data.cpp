@@ -65,8 +65,7 @@ void MNISTIterator::makeDataAndLabel(string dir) {
     unsigned char value=0;
 
     for(int img_idx = 0; img_idx < number_of_images; ++img_idx) {
-      for(int pixel_idx = 0 ; pixel_idx < row_num * col_num;
-          ++pixel_idx) {
+      for(int pixel_idx = 0 ; pixel_idx < shape_; ++pixel_idx) {
         data_file.read((char*)&value, sizeof(value));
         datas->at(batch_idx)[pixel_idx]= (float)value;
       }
@@ -80,7 +79,6 @@ void MNISTIterator::makeDataAndLabel(string dir) {
         auto data_tensor = new tensor(datas);
         auto label_tensor = new tensor(labels);
         data_wth_taget_.push_back(std::make_tuple(data_tensor, label_tensor));
-        push
         batch_idx = 0;
       }
     }

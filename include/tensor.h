@@ -9,7 +9,7 @@ class tensor {
   tensor(shape s);
   tensor(vector<float> *v);
   tensor(vector<vector<float>> *v);
-  tensor(const tensor& ) = delete;
+  tensor(const tensor&) = delete;
 
   ~tensor();
 

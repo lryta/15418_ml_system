@@ -5,8 +5,8 @@
 
 namespace MLLib {
 
-struct OptimizerConfig {
-  OptimizerConfig(float lr,
+struct optimizerConfig {
+  optimizerConfig(float lr,
       bool use_m = false, bool m = 0,
       bool use_w = false, bool w = 0): 
     lr(lr), use_monmentum(use_m), m(momentum),
@@ -20,20 +20,20 @@ struct OptimizerConfig {
   float weightDecay;
 }
 
-class Optimizer {
+class optimizer {
  public:
-  Optimizer(OptimizerConfig setting);
+  optimizer(optimizerConfig setting);
   virtual void update();
   virtual void reset();
   virtual void registerParams(Layer curLayer);
 }
 
-class SGDOptimizer : Optimizer {
+class SGDOptimizer : optimizer {
  public:
-  SGD(OptimizerConfig setting);
+  SGDOptimizer(optimizerConfig config_);
 
  private:
-  Settings settings;
+  optimizerConfig config_;
   std::vector<Tensor*> weights;
   std::vector<Tensor*> velocity;
 }

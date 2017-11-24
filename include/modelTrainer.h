@@ -1,3 +1,4 @@
+#include <string>
 #include "data.h"
 #include "net.h"
 #include "optimizer.h"
@@ -6,11 +7,12 @@ namespace MLLib {
 
 class trainerConfig {
  public:
-  trainerConfig(int e, int b):
-    epochNum_(e), batchNum_(b) {}
+  trainerConfig(int e, int b, std::string dir):
+    epochNum_(e), batchNum_(b), dataset_dir_(dir) {}
 
   int epochNum_;
   int batchNum_;
+  std::string dataset_dir_;
 };
 
 //TODO: Not sure we want to support test()
@@ -18,7 +20,7 @@ class modelTrainer {
  public:
   modelTrainer(trainerConfig);
 
-  void setModel(NNType, std::vector<int>);
+  void setModel(ModelType, std::vector<int>);
   void setOptimizer(optimizerConfig);
 
   void train(int epoch);

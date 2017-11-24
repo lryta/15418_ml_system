@@ -2,6 +2,11 @@
 #include <vector>
 
 namespace MLLib {
+
+enum ModelType {
+  MLPNet;
+};
+
 class Net {
  public:
   void foward(vector<Tensor*> ins, vector<Tensor*> targets);
