@@ -4,34 +4,24 @@
 
 namespace MLLib {
 
-class Tensor {
+class tensor {
  public:
-  // matrix M * N
-  Tensor(shape s):shape_(s) {
-    ptr_ = (float*) calloc(shape_.getTotal() * sizeof(float));
-  }
+  tensor(shape s);
+  tensor(vector<float> *v);
+  tensor(vector<vector<float>> *v);
+  tensor(const tensor& ) = delete;
 
-  // TODO: copy constructor of shape
-  Tensor(Tensor& src) {
-    shape_ = src.shape_;
-    ptr_ = (float*) calloc(shape_.getTotal() * sizeof(float));
-  }
+  ~tensor();
 
-  // TODO: Add Grad()
-  // TODO: Add De-Allocator()
-
-  shape getShape() {
-    return shape_;
-  }
-
-  // Would be extended to getCPUPtr & getGPUPtr
-  float* getPtr() {
-    return ptr_;
-  }
+  shape getShape();
+  // TODO: extended to support GPU pointer
+  // e.g. getCPUData. getGPUGrad
+  float* getData();
+  float* getGrad();
 
  private:
   shape shape_;
-  float *ptr_;
+  float *data_, *grad_;
 };
 
 }
