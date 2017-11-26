@@ -1,6 +1,6 @@
 #include<math.h>
 
-namespace MLLib{
+namespace TinyML{
 
 namespace matrix{
 

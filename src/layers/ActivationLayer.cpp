@@ -1,6 +1,6 @@
 #include "layers/ActivationLayer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 void SigmoidLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
   assert(ins.size() == 1);

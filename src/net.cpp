@@ -5,7 +5,7 @@
 #include "layers/L2LossLayer.h"
 #include "layers/ActivationLayer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 using std::vector;
 

@@ -1,7 +1,7 @@
 #include<vector>
 #include<tensor.h>
 
-namespace MLLib{
+namespace TinyML{
   
 using std::vector;
 

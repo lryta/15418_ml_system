@@ -1,6 +1,6 @@
 #include "modelTrainer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 modelTrainer::modelTrainer(trainerConfig config)
   :config_(config) {

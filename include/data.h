@@ -4,7 +4,7 @@
 #include <vector>
 #include "tensor.h"
 
-namespace MLLib {
+namespace TinyML {
 
 class dataIterator {
  public:

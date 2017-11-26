@@ -1,6 +1,6 @@
 #include "layer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 class FullyConnectedLayer:Layer {
  public:

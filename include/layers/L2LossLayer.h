@@ -1,7 +1,7 @@
 #include "tensor.h"
 #include "layer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 class L2LossLayer:LossLayer {
 public:

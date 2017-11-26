@@ -1,6 +1,6 @@
 #include "tensor.h"
 
-namespace MLLib {
+namespace TinyML {
 
 tensor::tensor(shape s):shape_(s), grad_(NULL) {
   data_ = (float*) calloc(shape_.getTotal() * sizeof(float));

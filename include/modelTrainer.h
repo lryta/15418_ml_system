@@ -3,7 +3,7 @@
 #include "net.h"
 #include "optimizer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 class trainerConfig {
  public:

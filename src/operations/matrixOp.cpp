@@ -1,7 +1,7 @@
 #include<math.h>
 #include<operations/MatrixOp.h>
 
-namespace MLLib{
+namespace TinyML{
 
 namespace matrix{
 

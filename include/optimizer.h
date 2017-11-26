@@ -3,7 +3,7 @@
 #include "tensor.h"
 #include "operations/matrixOp.h"
 
-namespace MLLib {
+namespace TinyML {
 
 struct optimizerConfig {
   optimizerConfig(float lr,

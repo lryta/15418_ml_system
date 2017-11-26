@@ -1,7 +1,7 @@
 #include "layer.h"
 #include "shape.h"
 
-namespace MLLib {
+namespace TinyML {
 
 class ActivationLayer:Layer {
  public:

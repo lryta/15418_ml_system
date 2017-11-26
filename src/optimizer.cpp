@@ -1,6 +1,6 @@
 #include "optim.h"
 
-namespace MLLib {
+namespace TinyML {
 
 SGDOptimizer::SGD(OptimizerConfig config):config_(config)
   {}

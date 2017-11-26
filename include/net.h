@@ -1,7 +1,7 @@
 #include <tuple>
 #include <vector>
 
-namespace MLLib {
+namespace TinyML {
 
 enum ModelType {
   MLPNet;

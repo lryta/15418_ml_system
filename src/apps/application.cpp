@@ -1,7 +1,7 @@
 #include "application.h"
 #include "modelTrainer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 runMLP::runMLP():trainer_(NULL) {
   trainerConfig train_config(5, 128, "../datasets");

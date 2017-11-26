@@ -5,7 +5,7 @@
 
 #include "data.h"
 
-namespace MLLib {
+namespace TinyML {
 
 int MNISTIterator::reverseInt(int v) {
   unsigned char ch1, ch2, ch3, ch4;

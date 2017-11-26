@@ -1,7 +1,7 @@
 #include <math.h>
 #include "L2LossLayer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 // ins[0] predict, ins[1] target
 void L2LossLayer::forward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {

@@ -1,6 +1,6 @@
 #include "include/modelTrainer.h"
 
-namespace MLLib {
+namespace TinyML {
 
 class application {
  public:

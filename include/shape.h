@@ -1,7 +1,7 @@
 #include<tuple>
 #include<assert>
 
-namespace MLLib {
+namespace TinyML {
 
 // shape has at most three dim at present
 class Shape {

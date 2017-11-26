@@ -2,7 +2,7 @@
 
 #include "shape.h"
 
-namespace MLLib {
+namespace TinyML {
 
 class tensor {
  public:

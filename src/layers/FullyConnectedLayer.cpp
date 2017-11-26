@@ -1,7 +1,7 @@
 #include "layers/FullyConnectedLayer.h"
 #include "MatrixOp.h"
 
-namespace MLLib {
+namespace TinyML {
 
 vector<Tensor&> inferShape::getParam() {
   return {weight_, bias_};
