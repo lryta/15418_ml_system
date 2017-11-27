@@ -14,8 +14,8 @@ vector<Tensor&> FullyConnectedLayer::inferShape(vector<tensor> &ins, vector<tens
 }
 
 vector<Tensor&> FullyConnectedLayer::initWeight(vector<tensor> &ins, vector<tensor> &ous) {
-  weight_ = Tensor(ins.getDim(2), inter_dim_);
-  bias_ = Tensor(inter_dim_);
+  weight_ = Tensor({ins.getDim(2), inter_dim_});
+  bias_ = Tensor({inter_dim_});
 }
 
 void FullyConnectedLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
@@ -23,8 +23,10 @@ void FullyConnectedLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
   assert(ous.size() == 1);
   auto in_shape = ins[0].getShape();
   auto out_shape = ous[0].getShape();
+  auto bias_shape = bias_.getShape();
 
   assert(in_shape.getDim(2) == weight_.getDim(1));
+  assert(bias_shape.getDim(1) == weight_.getDim(2));
 
   // y = x * w + b
   matrix::gemm(ins[0].getData(), weight_.getData(), bias_.getData(), ous[0].getData(),
@@ -50,7 +52,7 @@ void FullyConnectedLayer::backward(vector<tensor> &ins, vector<tensor> &ous) {
 
   // Get Delta of b
   // bias_grad = sum(y_grad, 1)
-  matrix::matrix_to_vec(ous[0].getGrad(), bias_.getGrad(), out_shape.getDim(1),  out_shape.getDim(2), 1);
+  matrix::reduceMatrix(ous[0].getGrad(), bias_.getGrad(), out_shape.getDim(1),  out_shape.getDim(2), 1);
 }
 
 };

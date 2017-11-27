@@ -7,12 +7,12 @@ namespace matrix{
   #define pos(i, j, col_num) ((col_num) * (i) + (j))
 
   /* General matrix multiplication
-   *  gamma = a * lph * beta + omega * b
+   *  gamma = a * alpha * beta + omega * b
    *
    * Specification:
    *  - alpha(gamma_row, dim_num), row & col exchange on t_alpha
    *  - beta(dim_num, gamma_col), row & col exchange on t_alpha
-   *  - omega(1, gamma_col)
+   *  - omega(gamma_col)
    *  - gamma(gamma_row, gamma_col)
    *
    * Description:
@@ -40,7 +40,8 @@ namespace matrix{
    *   - beta (row, col)
    *   - omegarow, col)
    */
-  void eleSubtract(float* a, float* b, float* c, int row, int col);
+  void eleSubtract(float* alpha, float* beta,
+      float* omega, int row, int col);
 
   /* Element Square matrixes
    *  beta = alpha^2
@@ -78,6 +79,15 @@ namespace matrix{
    */
   void multiEle(float* alpha, float* beta, float* omega, int row, int col);
 
+  /* multiEleInplace
+   *  beta = alpha * beta
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta  (row, col)
+   */
+  void multiEleInplace(float* alpha, float* beta, int row, int col);
+
   /* sigmoidOp 
    *  beta = 1 / (1 + exp(-alpha))
    *
@@ -95,6 +105,36 @@ namespace matrix{
    *   - beta (row, col)
    */
   void linearOpInplace(float* alpha, float* beta, int row, int col, float a, float b, float c = 0);
+
+  /* getCorrectlyRecognized 
+   *  get total number of correctly recognized value
+   *
+   *  Specification:
+   *   - predicts (row, col)
+   *   - targets (row, col)
+   */
+  int getCorrectlyRecognized(float* predicts, float* targets, int row, int col, float lowThresh, float highThresh);
+
+  /* softmax
+   *  Apply softmax operation
+   *   beta[i, :] = softmax(alph[i, :])
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void softmax(float* alpha, float* beta, int row, int col);
+
+  /* negLogLikelihood
+   *  Apply negLogLikelihood operation
+   *   loss[i] = negloglikeli(predict[i, :], taget[i, :])
+   *   return sum loss[i]
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  float negLogLikelihood(float* predicts, float* targets, int row, int col);
 
 }
 }

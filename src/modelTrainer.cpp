@@ -2,8 +2,8 @@
 
 namespace TinyML {
 
-modelTrainer::modelTrainer(trainerConfig config)
-  :config_(config) {
+modelTrainer::modelTrainer(trainerConfig *config)
+  :config_(*config) {
   data_iter_ = new MNISTIterator(config_.dataset_dir_, config_.batch_num_);
 }
 
@@ -20,7 +20,9 @@ void modelTrainer::setModel(ModelType type, std::vector<int> inter_dims) {
   switch (type) {
     case ModelType::MLPNet:
       assert(inter_dims.size() > 0);
-      net_ = new MLPNet(data_iter_.getDataShape(), inter_dims);
+      auto total_dims = inter_dims;
+      total_dims.push_back(data_iter_->getTargetDim());
+      net_ = new MLPNet(data_iter_->getDataShape(), data_iter_->getTargetShape(), total_dims);
     default:
       throw "Network Type not recognized";
   }
@@ -40,7 +42,7 @@ void modelTrainer::train() {
 
   for (int i = 0; i < config_.epoch; ++i) {
     // Reset iterator at very beginning
-    data_iter_.start();
+    data_iter_.reset();
 
     labelled_num_ = 0;
     correctly_labelled_num_ = 0;
@@ -50,9 +52,9 @@ void modelTrainer::train() {
       auto input = std::get<0>(data);
       auto target = std::get<1>(data);
       // forward
-      net_.forwrd({input}, {target});
+      net_->forwrd({input}, {target});
       correctly_labelled_num_ += net_->correctlyRecognizedDataNum();
-      labelled_num_ += batchSize;
+      labelled_num_ += config_.batch_num_;
       printf("Total Loss is %f\n", net_->getLoss());
 
       // back prop and update weight

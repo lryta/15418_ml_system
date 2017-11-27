@@ -22,7 +22,7 @@ struct optimizerConfig {
 
 class optimizer {
  public:
-  optimizer(optimizerConfig setting);
+  optimizer();
   virtual void update();
   virtual void reset();
   virtual void registerParams(Layer curLayer);
@@ -30,12 +30,12 @@ class optimizer {
 
 class SGDOptimizer : optimizer {
  public:
-  SGDOptimizer(optimizerConfig config_);
+  SGDOptimizer(optimizerConfig *);
 
  private:
   optimizerConfig config_;
-  std::vector<Tensor*> weights;
-  std::vector<Tensor*> velocity;
+  std::vector<Tensor*> weights_;
+  std::vector<Tensor*> velocity_;
 }
 
 }

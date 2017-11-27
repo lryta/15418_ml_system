@@ -2,6 +2,7 @@
 #include <assert>
 #include <string>
 #include <vector>
+#include "shape.h"
 #include "tensor.h"
 
 namespace TinyML {
@@ -15,7 +16,10 @@ class dataIterator {
    */
   virtual std::tuple<tensor*, tensor*> *next();
   virtual bool getNext();
-  virtual int shape();
+  virtual shape getDataShape();
+  virtual shape getTargetShape();
+  virtual int getDataDim();
+  virtual int getTargetDim();
   virtual void reset();
 }
 
@@ -23,8 +27,16 @@ class MNISTIterator:dataIterator {
  public:
   MNISTIterator(std::string dataset_dir, int batch_num);
 
-  int shape() {
-    return shape_;
+  shape getDataShape() {
+    // Make sure the data is read to memory
+    assert(data_with_target_.size() > 0);
+    return shape(batch_num_, in_dim_);
+  }
+
+  shape getTargetShape() {
+    // Make sure the data is read to memory
+    assert(data_with_target_.size() > 0);
+    return shape(batch_num_, out_dim_);
   }
 
   bool hasNext() {
@@ -36,6 +48,14 @@ class MNISTIterator:dataIterator {
     return data_with_target_[shuffled_pos_[pos_++]];
   }
 
+  int getDataDim() {
+    return in_dim_;
+  }
+
+  int getTargetDim() {
+    return target_dim_;
+  }
+
  private:
   int reverseInt(int);
   int reverseInt();
@@ -45,7 +65,7 @@ class MNISTIterator:dataIterator {
   std::vector<std::tuple<tensor*, tensor*>> data_with_target_;
   std::vector<int> shuffled_pos_;
 
-  int batch_num_, total_num_, shape_;
+  int batch_num_, total_num_, in_dim_, out_dim_;
   int pos_;
 }
 

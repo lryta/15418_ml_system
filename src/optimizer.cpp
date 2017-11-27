@@ -2,12 +2,13 @@
 
 namespace TinyML {
 
-SGDOptimizer::SGD(OptimizerConfig config):config_(config)
+SGDOptimizer::SGD(OptimizerConfig *config):optimizer(), config_(*config),
+  weights_{0}, velocity_{0}
   {}
 
 void SGDOptimizer::registerParams(std::vector<Tensor*> params) {
   for (auto &param : params) {
-    weights.push_back(param);
+    weights_.push_back(param);
 
     if (config_.use_monmentum)
       velocity.push_back(zerosLike(param));
@@ -17,7 +18,7 @@ void SGDOptimizer::registerParams(std::vector<Tensor*> params) {
 // CR(Haoran): I suggest avoid using velocity at first
 // if we don't have enough time
 void SGDOptimizer::update() {
-  for (int i = 0; i < weights.size(); ++i) {
+  for (int i = 0; i < weights_.size(); ++i) {
     /*
     TODO: Implement velocity
     if (config_.use_monmentum)
@@ -32,14 +33,14 @@ void SGDOptimizer::update() {
     */
 
     // Implace Update
-    linearOpInplace(weights[i]->data, weights[i]->grad, 1, -1);
+    linearOpInplace(weights_[i]->getData(), weights_[i]->getGrad(), 1, -config.lr);
   }
 }
 
 void SGDOptimizer::reset() {
-  for (auto &i : velocity) {
-    i.setZeros();
-  }
+  //for (auto &i : velocity) {
+  //  i.setZeros();
+  //}
 }
 
 }

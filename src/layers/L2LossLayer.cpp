@@ -18,6 +18,7 @@ void L2LossLayer::forward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {
   // loss = sum(inter_square_)
   matrix::reduceToValue(&loss_, inter_square_.getData(), inter_shape.getDim(1), inter_shape.getDim(1));
   loss_ = sqrt(loss_);
+  correctlyRecognizedNum_ = matrix::eleSquare(ins[0].getData(), ins[1].getData());
 }
 
 void L2LossLayer::backward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {

@@ -6,7 +6,7 @@ namespace TinyML {
 class negLogLikeliLayer:LossLayer {
  public:
   negLogLikeliLayer(vecotr<shape> ins):LossLayer(vecotr<shape> ins),
-    correctlyRecognizedNum_(0), loss_(0), predict_(ins[0]) 
+    correctlyRecognizedNum_(0), loss_(0)
   {}
 
   vector<Tensor&> getParam() {
@@ -14,6 +14,7 @@ class negLogLikeliLayer:LossLayer {
   }
 
   void initIntermediateState(vector<shape> &ins, vector<shape> &ous) {
+    predict_ = tensor(ins[0]);
   }
 
   float getLoss() {

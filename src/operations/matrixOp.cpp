@@ -8,12 +8,12 @@ namespace matrix{
   #define pos(i, j, col_num) ((col_num) * (i) + (j))
 
   /* General matrix multiplication
-   *  gamma = a * lph * beta + omega * b
+   *  gamma = a * alpha * beta + omega * b
    *
    * Specification:
    *  - alpha(gamma_row, dim_num), row & col exchange on t_alpha
    *  - beta(dim_num, gamma_col), row & col exchange on t_alpha
-   *  - omega(1, gamma_col)
+   *  - omega(gamma_col)
    *  - gamma(gamma_row, gamma_col)
    *
    * Description:
@@ -30,7 +30,7 @@ namespace matrix{
         for (size_t k = 0; k < dim_num; ++k)
           value += alpha[t_alpha?pos(k, i, gamma_row):pos(i, k, dim_num)]
             * gamma_col[t_beta?pos(j, k, dim_num):pos(k, j, gamma_col)];
-        gamma[pos(i, j, gamma_col)] = value * a + (omega!=NULL)?omega[j] * b:(0);
+        gamma[pos(i, j, gamma_col)] = value * a + (omega!=NULL)?(omega[j] * b):(0);
       }
   }
 
@@ -65,12 +65,26 @@ namespace matrix{
    *  Specification:
    *   - alpha (row, col)
    *   - beta (row, col)
-   *   - omegarow, col)
+   *   - omega (row, col)
    */
-  void eleSubtract(float* a, float* b, float* c, int row, int col) {
+  void eleSubtract(float* alpha, float* beta,
+      float* omega, int row, int col) {
     for (int i = 0; i < row; ++i)
       for (int j = 0; j < col; ++j)
         omega[pos(i, j, col)] = alpha[pos(i, j, col)] - beta[pos(i, j, col)];
+  }
+
+  /* sigmoidOp 
+   *  beta = 1 / (1 + exp(-alpha))
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void sigmoidOp(float* alpha, float* beta, int row, int col) {
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        beta[pos(i, j, col)] = 1 / (1 + exp(-alpha[pos(i, j, col)]));
   }
 
   /* Element Square matrixes
@@ -128,6 +142,19 @@ namespace matrix{
         omega[pos(i, j, col)] += alpha[pos(i, j, col)] * beta[pos(i, j, col)];
   }
 
+  /* multiEleInplace
+   *  beta = alpha * beta
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta  (row, col)
+   */
+  void multiEleInplace(float* alpha, float* beta, int row, int col) {
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        beta[pos(i, j, col)] *= alpha[pos(i, j, col)];
+  }
+
   /* linearOpInplace 
    *  alpha = alpha * a + beta*b + c
    *
@@ -140,6 +167,76 @@ namespace matrix{
       for (int j = 0; j < col; ++j)
         beta[pos(i, j, col)] = beta[pos(i, j, col)] * a
           alpha[pos(i, j, col)] * b + c;
+  }
+
+  /* getCorrectlyRecognized 
+   *  get total number of correctly recognized value
+   *
+   *  Specification:
+   *   - predicts (row, col)
+   *   - targets (row, col)
+   */
+  int getCorrectlyRecognized(float* predicts, float* targets, int row, int col) {
+    int matched_num = 0, max_p_idx, max_p_idx;
+    float max_p_value,  max_p_value;
+
+    for (int i = 0; i < row; ++i) {
+      max_p_value = predicts[pos(i, 0, col)];
+      max_p_idx = 0;
+      max_t_value = targets[pos(i, 0, col)];
+      max_t_idx = 0;
+
+      for (int j = 1; j < col; ++j) {
+        if (max_p_value < predicts[pos(i, j, col)]) {
+          max_p_value = predicts[pos(i, j, col)];
+          max_p_idx = j;
+        }
+
+        if (max_t_value < targets[pos(i, j, col)]) {
+          max_t_value = targets[pos(i, j, col)];
+          max_t_idx = j;
+        }
+      }
+      matched_num += (max_t_idx == max_p_idx);
+
+    }
+
+    return matched_num;
+  }
+
+  /* softmax
+   *  Apply softmax operation
+   *   beta[i, :] = softmax(alph[i, :])
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void softmax(float* alpha, float* beta, int row, int col) {
+    for (int i = 0; i < row; ++i) {
+      float sum = 0;
+      for (int j = 0; j < col; ++j)
+        sum += exp(alph[pos(i, j, col)]);
+      for (int j = 0; j < col; ++j)
+        beta[pos(i, j, col)] = exp(alph[pos(i, j, col)]) / sum;
+    }
+  }
+
+  /* negLogLikelihood
+   *  Apply negLogLikelihood operation
+   *   loss[i] = negloglikeli(predict[i, :], taget[i, :])
+   *   return sum loss[i]
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  float negLogLikelihood(float* predicts, float* targets, int row, int col) {
+    float loss = 0;
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        loss += targets[pos(i, j, col)] * log(alph[pos(i, j, col)]);
+    return -loss;
   }
 
 }

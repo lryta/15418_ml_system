@@ -13,9 +13,15 @@ void SigmoidLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
 
 void SigmoidLayer::backward(vector<tensor> &ins, vector<tensor> &ous) {
   // inter_ = 1 - y
-  matrix::linearOp(ous[0].getData(), inter_.getData(), in_shape.getDim(1), in_shape.getDim(2), -1, 1);
-  // ins_grad = inter_ * y
-  matrix::multiEle(ous[0].getData(), inter_.getData(), ins.getGrad(),
+  matrix::linearOp(ous[0].getData(), inter_.getData(),
+      in_shape.getDim(1), in_shape.getDim(2), -1, 1);
+
+  // inter_ = inter_ * y
+  matrix::multiEleInplace(ous[0].getData(), inter_.getData(),
+      in_shape.getDim(1), in_shape.getDim(2));
+
+  // in_grad = out_grad * y * (1-y)
+  matrix::multiEle(ous[0].getGrad(), inter_.getData(), ins[0].getGrad(),
       in_shape.getDim(1), in_shape.getDim(2));
 }
 

@@ -38,7 +38,9 @@ class LossLayer:Layer {
   void initWeight(vector<shape> &ins, vector<shape> &ous) {
   }
 
+  virtual int correctlyRecognizedDataNum();
   virtual float getLoss();
+
 };
 
 }

@@ -9,10 +9,12 @@ enum ModelType {
 
 class Net {
  public:
-  void foward(vector<Tensor*> ins, vector<Tensor*> targets);
-  void backward(vector<Tensor*> ins, vector<Tensor*> targets);
+  virtual void foward(vector<tensor*> ins, vector<tensor*> targets);
+  virtual void backward(vector<tensor*> ins, vector<tensor*> targets);
+  virtual float getLoss();
+  virtual int correctlyRecognizedDataNum();
 
-  vector<Tensor*> getParams();
+  virtual vector<tensor*> getParams();
 }
 
 class MLPNet : Net {
@@ -23,12 +25,13 @@ class MLPNet : Net {
 
   ~MLP();
 
-  vector<Tensor*> getParams();
+  std::vector<tensor*> getParams();
 
  private:
   void buildLayers(shape in_shape, vector<size_t> hidden_dims);
 
   std::vector<Layer*> layers_;
-  std::vector<Tensor*> intermediate_tensors_, params_;
+  std::vector<tensor*> intermediate_tensors_, params_;
 }
+
 }

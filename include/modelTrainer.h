@@ -18,12 +18,12 @@ class trainerConfig {
 //TODO: Not sure we want to support test()
 class modelTrainer {
  public:
-  modelTrainer(trainerConfig);
+  modelTrainer(trainerConfig*);
 
   void setModel(ModelType, std::vector<int>);
   void setOptimizer(optimizerConfig);
 
-  void train(int epoch);
+  void train();
 
  private:
   int correctly_labelled_num_, labelled_num_;

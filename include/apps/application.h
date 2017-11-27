@@ -11,9 +11,13 @@ class application {
 class runMLP : application {
  public:
   runMLP();
-  virtual void run();
+  ~runMLP();
+  void run();
  private:
-  modelTrainer trainer_;
+  trainerConfig *trainer_conf_;
+  modelTrainer *trainer_;
+
+  optimizerConfig *opt_conf_;
 };
 
 }

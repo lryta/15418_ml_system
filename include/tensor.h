@@ -6,6 +6,7 @@ namespace TinyML {
 
 class tensor {
  public:
+  tensor();
   tensor(shape s);
   tensor(vector<float> *v);
   tensor(vector<vector<float>> *v);

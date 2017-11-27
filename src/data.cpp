@@ -51,27 +51,34 @@ void MNISTIterator::makeDataAndLabel(string dir) {
     readInt(data_file, data_num);
     readInt(label_file, label_num);
     assert(data_num == label_num);
+    printf("Total data num is %d\n", data_num);
     total_num_ = data_num;
 
     readInt(data_file, row_num);
     readInt(data_file, col_num);
-    shape_ = row_num * col_num;
+    in_dim_ = row_num * col_num;
+    out_dim_ = 10;
+    printf("in dim is %d\n", in_dim_);
 
     auto datas = new vector<vector<float>>(batch_num_,
-        vector<float>(row_num * col_num, 0));
-    auto labels = new vector<float>(batch_num_, 0);
+        vector<float>(in_dim_, 0));
+    auto labels = new vector<vector<float>>(batch_num_,
+        vector<float>(out_dim_, 0));
 
     int batch_idx = 0;
     unsigned char value=0;
 
     for(int img_idx = 0; img_idx < number_of_images; ++img_idx) {
-      for(int pixel_idx = 0 ; pixel_idx < shape_; ++pixel_idx) {
+      for(int pixel_idx = 0 ; pixel_idx < in_dim_; ++pixel_idx) {
         data_file.read((char*)&value, sizeof(value));
         datas->at(batch_idx)[pixel_idx]= (float)value;
       }
 
       label_file.read((char*)&value, sizeof(value));
-      labels->at(batch_idx) = (float)value;
+      assert(value >= 0 && value < out_dim_);
+      labels->at(batch_idx).fill(labels->at(batch_idx).begin(),
+          labels->at(batch_idx).end(), 0);
+      labels->at(batch_idx)[value] = 1;
 
       ++batch_idx;
 
