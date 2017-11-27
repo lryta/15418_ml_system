@@ -4,7 +4,7 @@
 namespace TinyML {
 
 // ins[0] predict, ins[1] target
-void L2LossLayer::forward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {
+void L2LossLayer::forward(vecotr<tensor> &ins, vecotr<tensor> &ous) {
   assert(ous.size() == 0);
   auto p_shape = ins[0].getShape();
   auto t_shape = ins[1].getShape();
@@ -21,7 +21,7 @@ void L2LossLayer::forward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {
   correctlyRecognizedNum_ = matrix::eleSquare(ins[0].getData(), ins[1].getData());
 }
 
-void L2LossLayer::backward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {
+void L2LossLayer::backward(vecotr<tensor> &ins, vecotr<tensor> &ous) {
   //  ins_grad = inter * 1/loss_
   matrix::linearOp(inter_.getData(), ins[0].getGrad(), ins[0].getDim(1), ins[0].getDim(2), 1/loss_);
 }

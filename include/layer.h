@@ -20,7 +20,7 @@ class Layer {
   virtual void inferShape(vector<shape> &ins, vector<shape> &ous);
   virtual void initWeight(vector<shape> &ins, vector<shape> &ous);
   virtual void initIntermediateState(vector<shape> &ins, vector<shape> &ous);
-  virtual vector<Tensor&> getParam();
+  virtual vector<tensor&> getParam();
 
   virtual void forward(vector<tensor> &ins, vector<tensor> &ous);
   virtual void backward(vector<tensor> &ins, vector<tensor> &ous);

@@ -34,8 +34,8 @@ class SGDOptimizer : optimizer {
 
  private:
   optimizerConfig config_;
-  std::vector<Tensor*> weights_;
-  std::vector<Tensor*> velocity_;
+  std::vector<tensor*> weights_;
+  std::vector<tensor*> velocity_;
 }
 
 }

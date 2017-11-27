@@ -4,7 +4,7 @@
 namespace TinyML {
 
 // ins[0] predict, ins[1] target
-void negLogLikeliLayer::forward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {
+void negLogLikeliLayer::forward(vecotr<tensor> &ins, vecotr<tensor> &ous) {
   assert(ous.size() == 0);
   auto p_shape = ins[0].getShape();
   auto t_shape = ins[1].getShape();
@@ -21,7 +21,7 @@ void negLogLikeliLayer::forward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {
       ins[0].getDim(1), ins[0].getDim(2));
 }
 
-void negLogLikeliLayer::backward(vecotr<Tensor> &ins, vecotr<Tensor> &ous) {
+void negLogLikeliLayer::backward(vecotr<tensor> &ins, vecotr<tensor> &ous) {
   //  ins_grad = predict_ - target
   matrix::eleSubtract(predict_.getData(), ins[1].getData(), ins[0].getGrad(),
       ins[0].getDim(1), ins[0].getDim(2));

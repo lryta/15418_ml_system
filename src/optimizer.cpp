@@ -6,7 +6,7 @@ SGDOptimizer::SGD(OptimizerConfig *config):optimizer(), config_(*config),
   weights_{0}, velocity_{0}
   {}
 
-void SGDOptimizer::registerParams(std::vector<Tensor*> params) {
+void SGDOptimizer::registerParams(std::vector<tensor*> params) {
   for (auto &param : params) {
     weights_.push_back(param);
 
@@ -27,7 +27,7 @@ void SGDOptimizer::update() {
 
     TODO: Implement weight decay
     if (config_.weightDecay != 0) {
-      Tensor decay = config_.weightDecay * weights[i]->data;
+      tensor decay = config_.weightDecay * weights[i]->data;
       weights[i]->data -= decay;
     }
     */

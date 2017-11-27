@@ -9,7 +9,7 @@ class L2LossLayer:LossLayer {
     correctlyRecognizedNum_(0), loss_(0) 
   {}
 
-  vector<Tensor&> getParam() {
+  vector<tensor&> getParam() {
     return {};
   }
 

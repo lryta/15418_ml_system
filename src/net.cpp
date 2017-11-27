@@ -20,13 +20,13 @@ void MLPNet::buildLayers(shape in_shape, shape target_shape, vector<size_t> hidd
     int inter_dim = inter_shape.getDim(2);
 
     layers_.push_back(new FullyConnectedLayer({inter_shape}, {out_shape}, hiddenDim));
-    intermediate_tensors_.push_back(new Tensor(out_shape));
+    intermediate_tensors_.push_back(new tensor(out_shape));
 
     assert(out_shape == shape(batch_num, hiddenDim));
 
     inter_shape = out_shape;
     layers_.push_back(new SigmoidLayer({inter_shape}, {out_shape}));
-    intermediate_tensors_.push_back(new Tensor(out_shape));
+    intermediate_tensors_.push_back(new tensor(out_shape));
 
     // shape shouldn't change after activation layer
     assert(inter_shape == out_shape);
@@ -37,7 +37,7 @@ void MLPNet::buildLayers(shape in_shape, shape target_shape, vector<size_t> hidd
   layers_.push_back(new negLogLikeliLayer({inter_shape, target_shape}, {}));
 }
 
-vector<Tensor*> MLPNet::getParams() {
+vector<tensor*> MLPNet::getParams() {
   if (params_.size() == 0) {
     for (auto const& layer : layers_) {
       vector<tensor*> layer_params = layers.getParams();
@@ -56,7 +56,7 @@ MLPNet::~MLPNet() {
     delete layer;
 }
 
-void MLPNet::forward(vector<Tensor*> ins, vector<Tensor*> targets) {
+void MLPNet::forward(vector<tensor*> ins, vector<tensor*> targets) {
   assert(layers.size() > 1);
 
   for (int i = 0; i < layers_.size() - 1; ++i)
@@ -73,7 +73,7 @@ float MLPNet::getLoss() {
   return layers_[layers_.size() - 1].getLoss();
 }
 
-void MLPNet::backward(vector<Tensor*> ins, vector<Tensor*> targets) {
+void MLPNet::backward(vector<tensor*> ins, vector<tensor*> targets) {
   layers_[layers_.size() - 1].backward({ins[0], targets[0]}, {});
 
   for (int i = layers_.size() - 1; i >= 0; --i)

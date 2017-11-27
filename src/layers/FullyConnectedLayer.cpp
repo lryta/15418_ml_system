@@ -3,19 +3,19 @@
 
 namespace TinyML {
 
-vector<Tensor&> inferShape::getParam() {
+vector<tensor&> inferShape::getParam() {
   return {weight_, bias_};
 }
 
-vector<Tensor&> FullyConnectedLayer::inferShape(vector<tensor> &ins, vector<tensor> &ous) {
+vector<tensor&> FullyConnectedLayer::inferShape(vector<tensor> &ins, vector<tensor> &ous) {
   auto in_shape = ins[0];
   ous.clear();
   ous.push_back(tensor(in_shape.getDim(1), inter_dim_));
 }
 
-vector<Tensor&> FullyConnectedLayer::initWeight(vector<tensor> &ins, vector<tensor> &ous) {
-  weight_ = Tensor({ins.getDim(2), inter_dim_});
-  bias_ = Tensor({inter_dim_});
+vector<tensor&> FullyConnectedLayer::initWeight(vector<tensor> &ins, vector<tensor> &ous) {
+  weight_ = tensor({ins.getDim(2), inter_dim_});
+  bias_ = tensor({inter_dim_});
 }
 
 void FullyConnectedLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
