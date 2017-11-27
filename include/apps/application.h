@@ -1,4 +1,4 @@
-#include "include/modelTrainer.h"
+#include "modelTrainer.h"
 
 namespace TinyML {
 

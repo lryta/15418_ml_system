@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <vector>
 
 #include "shape.h"
 
@@ -8,8 +9,8 @@ class tensor {
  public:
   tensor();
   tensor(shape s);
-  tensor(vector<float> *v);
-  tensor(vector<vector<float>> *v);
+  tensor(std::vector<float> *v);
+  tensor(std::vector<std::vector<float>> *v);
   tensor(const tensor&) = delete;
 
   ~tensor();

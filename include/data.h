@@ -1,5 +1,5 @@
-#include <Tuple>
-#include <assert>
+#include <tuple>
+#include <cassert>
 #include <string>
 #include <vector>
 #include "shape.h"
@@ -9,12 +9,9 @@ namespace TinyML {
 
 class dataIterator {
  public:
-  virtual dataIterator();
-  virtual ~dataIterator();
-  /* 
-   * return tuple<data, target>
-   */
-  virtual std::tuple<tensor*, tensor*> *next();
+  dataIterator();
+  ~dataIterator();
+  virtual std::tuple<tensor*, tensor*>* next();
   virtual bool getNext();
   virtual shape getDataShape();
   virtual shape getTargetShape();
