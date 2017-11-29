@@ -93,3 +93,6 @@ clean:
 
 run_mlp: tinyml
 	./run.sh
+
+include build/dep/src/*.cpp
+include build/dep/src/*/*.cpp
