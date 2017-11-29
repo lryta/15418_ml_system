@@ -1,12 +1,15 @@
+#ifndef _TINYML_LAYERS_ACTIVATIONLAYER_H
+#define _TINYML_LAYERS_ACTIVATIONLAYER_H
+
 #include "layer.h"
 #include "shape.h"
 
 namespace TinyML {
 
-class ActivationLayer:Layer {
+class Activationlayer:layer {
  public:
-  ActivationLayer(vector<shape> &ins, vector<shape> &ous):
-    Layer(ins, ous) {}
+  Activationlayer(vector<shape> &ins, vector<shape> &ous):
+    layer(ins, ous) {}
 
   // For activation layer, the output should be exactly the same
   void inferShape(vector<shape> &ins, vector<shape> &ous) {
@@ -23,13 +26,15 @@ class ActivationLayer:Layer {
   vector<tensor&> getParam() { return {}; }
 };
 
-class SigmoidLayer:ActivationLayer {
+class Sigmoidlayer:Activationlayer {
  public:
-  SigmoidLayer(vector<shape> &ins, vector<shape> &ous):
-    ActivationLayer(ins, ous) { }
+  Sigmoidlayer(vector<shape> &ins, vector<shape> &ous):
+    Activationlayer(ins, ous) { }
 
   void initIntermediateState(vector<shape> &ins, vector<shape> &ous)
   { inter_ = tensor(ins[0]); }
 };
 
 }
+
+#endif

@@ -1,11 +1,14 @@
+#ifndef _TINYML_LAYERS_NEGLOGLIKELILAYER_H
+#define _TINYML_LAYERS_NEGLOGLIKELILAYER_H
+
 #include "tensor.h"
 #include "layer.h"
 
 namespace TinyML {
 
-class negLogLikeliLayer:LossLayer {
+class negLogLikelilayer:Losslayer {
  public:
-  negLogLikeliLayer(vecotr<shape> ins):LossLayer(vecotr<shape> ins),
+  negLogLikelilayer(vecotr<shape> ins):Losslayer(vecotr<shape> ins),
     correctlyRecognizedNum_(0), loss_(0)
   {}
 
@@ -32,3 +35,5 @@ class negLogLikeliLayer:LossLayer {
 };
 
 }
+
+#endif

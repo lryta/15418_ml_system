@@ -1,7 +1,8 @@
+#ifndef _TINYML_SHAPE_H
+#define _TINYML_SHAPE_H
+
 #include<tuple>
 #include<cassert>
-
-
 
 namespace TinyML {
 
@@ -60,3 +61,5 @@ class shape {
 };
 
 }
+
+#endif

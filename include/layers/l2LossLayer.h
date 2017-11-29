@@ -1,11 +1,14 @@
+#ifndef _TINYML_LAYERS_L2LOSSLAYER_H
+#define _TINYML_LAYERS_L2LOSSLAYER_H
+
 #include "tensor.h"
 #include "layer.h"
 
 namespace TinyML {
 
-class L2LossLayer:LossLayer {
+class L2Losslayer:Losslayer {
  public:
-  L2LossLayer(vecotr<shape> ins):LossLayer(vecotr<shape> ins),
+  L2Losslayer(vecotr<shape> ins):Losslayer(vecotr<shape> ins),
     correctlyRecognizedNum_(0), loss_(0) 
   {}
 
@@ -32,3 +35,5 @@ class L2LossLayer:LossLayer {
 };
 
 }
+
+#endif

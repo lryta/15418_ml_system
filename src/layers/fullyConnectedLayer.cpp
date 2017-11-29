@@ -1,4 +1,4 @@
-#include "layers/FullyConnectedLayer.h"
+#include "layers/FullyConnectedlayer.h"
 #include "MatrixOp.h"
 
 namespace TinyML {
@@ -7,18 +7,18 @@ vector<tensor&> inferShape::getParam() {
   return {weight_, bias_};
 }
 
-vector<tensor&> FullyConnectedLayer::inferShape(vector<tensor> &ins, vector<tensor> &ous) {
+vector<tensor&> FullyConnectedlayer::inferShape(vector<tensor> &ins, vector<tensor> &ous) {
   auto in_shape = ins[0];
   ous.clear();
   ous.push_back(tensor(in_shape.getDim(1), inter_dim_));
 }
 
-vector<tensor&> FullyConnectedLayer::initWeight(vector<tensor> &ins, vector<tensor> &ous) {
+vector<tensor&> FullyConnectedlayer::initWeight(vector<tensor> &ins, vector<tensor> &ous) {
   weight_ = tensor({ins.getDim(2), inter_dim_});
   bias_ = tensor({inter_dim_});
 }
 
-void FullyConnectedLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
+void FullyConnectedlayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
   assert(ins.size() == 1);
   assert(ous.size() == 1);
   auto in_shape = ins[0].getShape();
@@ -33,7 +33,7 @@ void FullyConnectedLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
       out_shape.getDim(1), in_shape.getDim(2), out_shape.getDim(2));
 }
 
-void FullyConnectedLayer::backward(vector<tensor> &ins, vector<tensor> &ous) {
+void FullyConnectedlayer::backward(vector<tensor> &ins, vector<tensor> &ous) {
   auto in_shape = ins[0].getShape();
   auto w_shape = weight_.getShape();
   auto out_shape = ous[0].getShape();

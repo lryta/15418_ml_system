@@ -1,3 +1,6 @@
+#ifndef _TINYML_OPTIMIZER_H
+#define _TINYML_OPTIMIZER_H
+
 #include <string>
 #include <vector>
 #include "tensor.h"
@@ -9,24 +12,21 @@ struct optimizerConfig {
   optimizerConfig(float lr,
       bool use_m = false, bool m = 0,
       bool use_w = false, bool w = 0): 
-    lr(lr), use_monmentum(use_m), m(momentum),
-    use_weightDecay(use_w), weightDecay(w)
-  {}
+    lr_(lr), use_monmentum_(use_m), use_weightDecay_(use_w),
+    momentum_(m), weightDecay_(w) {}
 
-  float lr; // learning rate
-  bool use_monmentum;
-  float momentum;
-  bool use_weightDecay;
-  float weightDecay;
-}
+  float lr_; // learning rate
+  bool use_monmentum_, use_weightDecay_;
+  float momentum_, weightDecay_;
+};
 
 class optimizer {
  public:
   optimizer();
   virtual void update();
   virtual void reset();
-  virtual void registerParams(Layer curLayer);
-}
+  virtual void registerParams(layer curlayer);
+};
 
 class SGDOptimizer : optimizer {
  public:
@@ -36,6 +36,8 @@ class SGDOptimizer : optimizer {
   optimizerConfig config_;
   std::vector<tensor*> weights_;
   std::vector<tensor*> velocity_;
-}
+};
 
 }
+
+#endif

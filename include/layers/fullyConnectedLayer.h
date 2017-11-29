@@ -1,11 +1,14 @@
+#ifndef _TINYML_LAYERS_FULLYCONNECTEDLAYER_H
+#define _TINYML_LAYERS_FULLYCONNECTEDLAYER_H
+
 #include "layer.h"
 
 namespace TinyML {
 
-class FullyConnectedLayer:Layer {
+class FullyConnectedlayer:layer {
  public:
-  FullyConnectedLayer(vector<shape> ins, vector<shape> ous, int inter_dim):
-    Layer(ins, ous),inter_dim_(inter_dim) {
+  FullyConnectedlayer(vector<shape> ins, vector<shape> ous, int inter_dim):
+    layer(ins, ous),inter_dim_(inter_dim) {
   }
 
 private:
@@ -14,3 +17,5 @@ private:
 };
 
 }
+
+#endif

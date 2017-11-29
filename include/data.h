@@ -1,3 +1,6 @@
+#ifndef _TINYML_DATA_H
+#define _TINYML_DATA_H
+
 #include <tuple>
 #include <cassert>
 #include <string>
@@ -11,14 +14,14 @@ class dataIterator {
  public:
   dataIterator();
   ~dataIterator();
-  virtual std::tuple<tensor*, tensor*>* next();
+  virtual std::tuple<tensor*, tensor*> next();
   virtual bool getNext();
   virtual shape getDataShape();
   virtual shape getTargetShape();
   virtual int getDataDim();
   virtual int getTargetDim();
   virtual void reset();
-}
+};
 
 class MNISTIterator:dataIterator {
  public:
@@ -41,7 +44,7 @@ class MNISTIterator:dataIterator {
   }
   
   std::tuple<tensor*, tensor*> next() {
-    assert(pos_ < shuffled_pos_.size())
+    assert(pos_ < shuffled_pos_.size());
     return data_with_target_[shuffled_pos_[pos_++]];
   }
 
@@ -50,7 +53,7 @@ class MNISTIterator:dataIterator {
   }
 
   int getTargetDim() {
-    return target_dim_;
+    return out_dim_;
   }
 
  private:
@@ -63,7 +66,9 @@ class MNISTIterator:dataIterator {
   std::vector<int> shuffled_pos_;
 
   int batch_num_, total_num_, in_dim_, out_dim_;
-  int pos_;
-}
+  size_t pos_;
+};
 
 }
+
+#endif

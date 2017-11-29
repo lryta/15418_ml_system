@@ -1,8 +1,8 @@
-#include "layers/ActivationLayer.h"
+#include "layers/Activationlayer.h"
 
 namespace TinyML {
 
-void SigmoidLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
+void Sigmoidlayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
   assert(ins.size() == 1);
   assert(ins.size() == ous.size());
   auto in_shape = ins[0].getShape();
@@ -11,7 +11,7 @@ void SigmoidLayer::forward(vector<tensor> &ins, vector<tensor> &ous) {
   matrix::sigmoidOp(ins[0].getData(), ous[0].getData(), in_shape.getDim(1), in_shape.getDim(2));
 }
 
-void SigmoidLayer::backward(vector<tensor> &ins, vector<tensor> &ous) {
+void Sigmoidlayer::backward(vector<tensor> &ins, vector<tensor> &ous) {
   // inter_ = 1 - y
   matrix::linearOp(ous[0].getData(), inter_.getData(),
       in_shape.getDim(1), in_shape.getDim(2), -1, 1);

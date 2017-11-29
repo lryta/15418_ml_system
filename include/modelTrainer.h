@@ -1,3 +1,6 @@
+#ifndef _TINYML_MODELTRAINER_H
+#define _TINYML_MODELTRAINER_H
+
 #include <string>
 #include "data.h"
 #include "net.h"
@@ -35,3 +38,5 @@ class modelTrainer {
 };
 
 }
+
+#endif

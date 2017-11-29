@@ -1,3 +1,6 @@
+#ifndef _TINYML_OPERATIONS_MATRIXOP_H
+#define _TINYML_OPERATIONS_MATRIXOP_H
+
 #include<math.h>
 
 namespace TinyML{
@@ -138,3 +141,5 @@ namespace matrix{
 
 }
 }
+
+#endif

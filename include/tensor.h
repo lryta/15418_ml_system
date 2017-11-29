@@ -1,3 +1,6 @@
+#ifndef _TINYML_TENSOR_H
+#define _TINYML_TENSOR_H
+
 #include <stdlib.h>
 #include <vector>
 
@@ -27,3 +30,6 @@ class tensor {
 };
 
 }
+
+
+#endif

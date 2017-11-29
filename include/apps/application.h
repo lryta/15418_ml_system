@@ -1,3 +1,6 @@
+#ifndef _TINYML_APPS_APPLICATION_H
+#define _TINYML_APPS_APPLICATION_H
+
 #include "modelTrainer.h"
 
 namespace TinyML {
@@ -14,10 +17,12 @@ class runMLP : application {
   ~runMLP();
   void run();
  private:
-  trainerConfig *trainer_conf_;
+  trainerConfig *train_config_;
   modelTrainer *trainer_;
 
-  optimizerConfig *opt_conf_;
+  optimizerConfig *opt_config_;
 };
 
 }
+
+#endif

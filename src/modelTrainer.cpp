@@ -18,13 +18,13 @@ void modelTrainer::setModel(ModelType type, std::vector<int> inter_dims) {
     throw "setModel() should be called before setOptimizer()";
 
   switch (type) {
-    case ModelType::MLPNet:
+    case ModelType::MLPnet:
       assert(inter_dims.size() > 0);
       auto total_dims = inter_dims;
       total_dims.push_back(data_iter_->getTargetDim());
-      net_ = new MLPNet(data_iter_->getDataShape(), data_iter_->getTargetShape(), total_dims);
+      net_ = new MLPnet(data_iter_->getDataShape(), data_iter_->getTargetShape(), total_dims);
     default:
-      throw "Network Type not recognized";
+      throw "network Type not recognized";
   }
 }
 

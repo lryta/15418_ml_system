@@ -1,13 +1,19 @@
+#ifndef _TINYML_NET_H
+#define _TINYML_NET_H
+
 #include <tuple>
 #include <vector>
 
+#include "layer.h"
+
 namespace TinyML {
+using std::vector;
 
 enum ModelType {
-  MLPNet;
+  MLPnet
 };
 
-class Net {
+class net {
  public:
   virtual void foward(vector<tensor*> ins, vector<tensor*> targets);
   virtual void backward(vector<tensor*> ins, vector<tensor*> targets);
@@ -15,23 +21,25 @@ class Net {
   virtual int correctlyRecognizedDataNum();
 
   virtual vector<tensor*> getParams();
-}
+};
 
-class MLPNet : Net {
+class MLPnet : net {
  public:
-  MLP(shape in_shape, vector<size_t> hidden_dims):Net() {
-    buildLayers(in_shape, hidden_dims);
+  MLPnet(shape in_shape, vector<size_t> hidden_dims):net() {
+    buildlayers(in_shape, hidden_dims);
   }
 
-  ~MLP();
+  ~MLPnet();
 
   std::vector<tensor*> getParams();
 
  private:
-  void buildLayers(shape in_shape, vector<size_t> hidden_dims);
+  void buildlayers(shape in_shape, vector<size_t> hidden_dims);
 
-  std::vector<Layer*> layers_;
+  std::vector<layer*> layers_;
   std::vector<tensor*> intermediate_tensors_, params_;
-}
+};
 
 }
+
+#endif
