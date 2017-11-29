@@ -62,7 +62,7 @@ $(BUILD)/obj/%.o: src/%.cpp
 	$(QUIET_ECHO) $@: Compiling object
 	@ mkdir -p $(dir $(BUILD)/dep/$<)
 	@ g++ $(MYFLAGS) $(CFLAGS) -M -MG -MQ $@ -DCOMPILINGDEPENDENCIES \
-        -o $(BUILD)/dep/$(<:%.c=%.d) -c $<
+        -o $(BUILD)/dep/$(<:%.cpp=%.d) -c $<
 	@ mkdir -p $(dir $@)
 	$(VERBOSE_SHOW) g++ $(MYFLAGS) $(CFLAGS) -o $@ -c $<
 
@@ -94,5 +94,5 @@ clean:
 run_mlp: tinyml
 	./run.sh
 
-include build/dep/src/*.cpp
-include build/dep/src/*/*.cpp
+-include build/dep/src/*.d
+-include build/dep/src/*/*.d
