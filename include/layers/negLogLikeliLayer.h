@@ -6,13 +6,13 @@
 
 namespace TinyML {
 
-class negLogLikelilayer:Losslayer {
+class negLogLikelilayer: public Losslayer {
  public:
-  negLogLikelilayer(vecotr<shape> ins):Losslayer(vecotr<shape> ins),
+  negLogLikelilayer(vector<shape> &ins, vector<shape> &ous):Losslayer(ins, ous),
     correctlyRecognizedNum_(0), loss_(0)
   {}
 
-  vector<tensor&> getParam() {
+  vector<tensor*> getParam() {
     return {};
   }
 
@@ -27,6 +27,9 @@ class negLogLikelilayer:Losslayer {
   int correctlyRecognizedDataNum() {
     return correctlyRecognizedNum_;
   }
+
+  virtual void forward(vector<tensor*> ins, vector<tensor*> ous);
+  virtual void backward(vector<tensor*> ins, vector<tensor*> ous);
 
  private:
   int correctlyRecognizedNum_;

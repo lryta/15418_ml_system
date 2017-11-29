@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "tensor.h"
+#include "layer.h"
 #include "operations/matrixOp.h"
 
 namespace TinyML {
@@ -22,15 +23,18 @@ struct optimizerConfig {
 
 class optimizer {
  public:
-  optimizer();
-  virtual void update();
-  virtual void reset();
-  virtual void registerParams(layer curlayer);
+  optimizer() {}
+  virtual void update() = 0;
+  virtual void reset() = 0;
+  virtual void registerParams(std::vector<tensor*>) = 0;
 };
 
-class SGDOptimizer : optimizer {
+class SGDOptimizer : public optimizer {
  public:
   SGDOptimizer(optimizerConfig *);
+  virtual void update();
+  virtual void reset();
+  virtual void registerParams(std::vector<tensor*>);
 
  private:
   optimizerConfig config_;

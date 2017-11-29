@@ -1,8 +1,9 @@
 #ifndef _TINYML_LAYER_H
 #define _TINYML_LAYER_H
 
-#include<vector>
-#include"tensor.h"
+#include <vector>
+#include "tensor.h"
+#include "operations/matrixOp.h"
 
 namespace TinyML{
   
@@ -20,16 +21,17 @@ class layer {
     initIntermediateState(ins, ous);
   }
 
-  virtual void inferShape(vector<shape> &ins, vector<shape> &ous);
-  virtual void initWeight(vector<shape> &ins, vector<shape> &ous);
-  virtual void initIntermediateState(vector<shape> &ins, vector<shape> &ous);
-  virtual vector<tensor&> getParam();
+  virtual void inferShape(vector<shape> &ins, vector<shape> &ous) {}
+  virtual void initWeight(vector<shape> &ins, vector<shape> &ous) {}
+  virtual void initIntermediateState(vector<shape> &ins, vector<shape> &ous) {}
+  virtual vector<tensor*> getParam() = 0;
 
-  virtual void forward(vector<tensor> &ins, vector<tensor> &ous);
-  virtual void backward(vector<tensor> &ins, vector<tensor> &ous);
+  virtual void forward(vector<tensor*> ins, vector<tensor*> ous) = 0;
+  virtual void backward(vector<tensor*> ins, vector<tensor*> ous) = 0;
+
 };
 
-class Losslayer:layer {
+class Losslayer: public layer {
  public:
   Losslayer(vector<shape> &ins, vector<shape> &ous):layer(ins, ous) {}
 
@@ -40,8 +42,8 @@ class Losslayer:layer {
 
   void initWeight(vector<shape> &ins, vector<shape> &ous) {}
 
-  virtual int correctlyRecognizedDataNum();
-  virtual float getLoss();
+  virtual int correctlyRecognizedDataNum() = 0;
+  virtual float getLoss() = 0;
 
 };
 

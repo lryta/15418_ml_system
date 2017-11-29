@@ -1,29 +1,34 @@
 #include <math.h>
-#include "L2Losslayer.h"
+#include "layers/l2LossLayer.h"
 
 namespace TinyML {
 
 // ins[0] predict, ins[1] target
-void L2Losslayer::forward(vecotr<tensor> &ins, vecotr<tensor> &ous) {
+void L2Losslayer::forward(vector<tensor*> ins, vector<tensor*> ous) {
   assert(ous.size() == 0);
-  auto p_shape = ins[0].getShape();
-  auto t_shape = ins[1].getShape();
-  auto inter_shape = inter_.getShape();
+  assert(ins[0]->getShape() == ins[1]->getShape() && ins[0]->getShape() == inter_.getShape());
+  auto in_shape = ins[0]->getShape();
 
   // inter = (p - t)
-  matrix::eleSubtract(ins[0].getData(), ins[1].getData(),
-      inter_.getData(), ins[0].getDim(1), ins[0].getDim(2));
+  matrix::eleSubtract(ins[0]->getData(), ins[1]->getData(),
+      inter_.getData(), in_shape.getDim(1), in_shape.getDim(2));
   // inter_sqrt = inter ^ 2
-  matrix::eleSquare(inter_square_.getData(), inter_.getData(), ins[0].getDim(1), ins[0].getDim(2));
+  matrix::eleSquare(inter_square_.getData(), inter_.getData(), in_shape.getDim(1), in_shape.getDim(2));
   // loss = sum(inter_square_)
-  matrix::reduceToValue(&loss_, inter_square_.getData(), inter_shape.getDim(1), inter_shape.getDim(1));
+  matrix::reduceToValue(&loss_, inter_square_.getData(), in_shape.getDim(1), in_shape.getDim(2));
   loss_ = sqrt(loss_);
-  correctlyRecognizedNum_ = matrix::eleSquare(ins[0].getData(), ins[1].getData());
+
+  // Should not enter this line
+  // the way to calculate correctly recognized num is wrong here
+  assert(false);
+  correctlyRecognizedNum_ = matrix::getCorrectlyRecognized(ins[0]->getData(),
+      ins[1]->getData(), in_shape.getDim(1), in_shape.getDim(2));
 }
 
-void L2Losslayer::backward(vecotr<tensor> &ins, vecotr<tensor> &ous) {
+void L2Losslayer::backward(vector<tensor*> ins, vector<tensor*> ous) {
+  auto in_shape = ins[0]->getShape();
   //  ins_grad = inter * 1/loss_
-  matrix::linearOp(inter_.getData(), ins[0].getGrad(), ins[0].getDim(1), ins[0].getDim(2), 1/loss_);
+  matrix::linearOp(inter_.getData(), ins[0]->getGrad(), in_shape.getDim(1), in_shape.getDim(2), 1/loss_);
 }
 
 }

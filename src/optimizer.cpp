@@ -1,8 +1,8 @@
-#include "optim.h"
+#include "optimizer.h"
 
 namespace TinyML {
 
-SGDOptimizer::SGD(OptimizerConfig *config):optimizer(), config_(*config),
+SGDOptimizer::SGDOptimizer(optimizerConfig *config):optimizer(), config_(*config),
   weights_{0}, velocity_{0}
   {}
 
@@ -10,8 +10,8 @@ void SGDOptimizer::registerParams(std::vector<tensor*> params) {
   for (auto &param : params) {
     weights_.push_back(param);
 
-    if (config_.use_monmentum)
-      velocity.push_back(zerosLike(param));
+    //if (config_.use_monmentum_)
+    //  velocity_.push_back(zerosLike(param));
   }
 }
 
@@ -33,7 +33,9 @@ void SGDOptimizer::update() {
     */
 
     // Implace Update
-    linearOpInplace(weights_[i]->getData(), weights_[i]->getGrad(), 1, -config.lr);
+    auto in_shape = weights_[i]->getShape();
+    matrix::linearOpInplace(weights_[i]->getData(), weights_[i]->getGrad(),
+        in_shape.getDim(1), in_shape.getDim(2), 1, -config_.lr_);
   }
 }
 

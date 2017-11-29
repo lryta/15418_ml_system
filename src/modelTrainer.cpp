@@ -13,16 +13,19 @@ modelTrainer::~modelTrainer() {
   delete net_;
 }
 
-void modelTrainer::setModel(ModelType type, std::vector<int> inter_dims) {
+void modelTrainer::setModel(ModelType type, std::vector<size_t> inter_dims) {
   if (weight_updater_ != NULL)
     throw "setModel() should be called before setOptimizer()";
 
   switch (type) {
-    case ModelType::MLPnet:
-      assert(inter_dims.size() > 0);
-      auto total_dims = inter_dims;
-      total_dims.push_back(data_iter_->getTargetDim());
-      net_ = new MLPnet(data_iter_->getDataShape(), data_iter_->getTargetShape(), total_dims);
+    case ModelType::MLPnetType:
+      {
+        assert(inter_dims.size() > 0);
+        auto total_dims = inter_dims;
+        total_dims.push_back(data_iter_->getTargetDim());
+        net_ = new MLPnet(data_iter_->getDataShape(), data_iter_->getTargetShape(), total_dims);
+      }
+      break;
     default:
       throw "network Type not recognized";
   }
@@ -32,27 +35,27 @@ void modelTrainer::setOptimizer(optimizerConfig config) {
   if (net_ == NULL)
     throw "setModel() should be called before setOptimizer()";
 
-  weight_updater_ = new SGDoptimizer(config);
-  weight_updater_->register(net_->getParams());
+  weight_updater_ = new SGDOptimizer(&config);
+  weight_updater_->registerParams(net_->getParams());
 }
 
 void modelTrainer::train() {
   if (weight_updater_ == NULL)
     throw "setOptimizer() should be called before train()";
 
-  for (int i = 0; i < config_.epoch; ++i) {
+  for (int i = 0; i < config_.epoch_num_; ++i) {
     // Reset iterator at very beginning
-    data_iter_.reset();
+    data_iter_->reset();
 
     labelled_num_ = 0;
     correctly_labelled_num_ = 0;
 
-    while (trainIter.hasNext()) {
-      auto data = data_iter_.next();
+    while (data_iter_->hasNext()) {
+      auto data = data_iter_->next();
       auto input = std::get<0>(data);
       auto target = std::get<1>(data);
       // forward
-      net_->forwrd({input}, {target});
+      net_->forward({input}, {target});
       correctly_labelled_num_ += net_->correctlyRecognizedDataNum();
       labelled_num_ += config_.batch_num_;
       printf("Total Loss is %f\n", net_->getLoss());
@@ -63,7 +66,7 @@ void modelTrainer::train() {
     }
 
     printf("Total Accuracy in epoch %d is %f\n",
-        i + 1, correctly_labelled_num_(float)/labelled_num_);
+        i + 1, (float)correctly_labelled_num_/labelled_num_);
   }
 }
 

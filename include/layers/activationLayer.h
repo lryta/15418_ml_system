@@ -6,7 +6,7 @@
 
 namespace TinyML {
 
-class Activationlayer:layer {
+class Activationlayer: public layer {
  public:
   Activationlayer(vector<shape> &ins, vector<shape> &ous):
     layer(ins, ous) {}
@@ -23,16 +23,24 @@ class Activationlayer:layer {
   void initWeight(vector<shape> &ins, vector<shape> &ous) {}
 
   // Usually no weight
-  vector<tensor&> getParam() { return {}; }
+  vector<tensor*> getParam() { return {}; }
+
+  virtual void forward(vector<tensor*> ins, vector<tensor*> ous) = 0;
+  virtual void backward(vector<tensor*> ins, vector<tensor*> ous) = 0;
 };
 
-class Sigmoidlayer:Activationlayer {
+class Sigmoidlayer: public Activationlayer {
  public:
   Sigmoidlayer(vector<shape> &ins, vector<shape> &ous):
     Activationlayer(ins, ous) { }
 
   void initIntermediateState(vector<shape> &ins, vector<shape> &ous)
   { inter_ = tensor(ins[0]); }
+
+  virtual void forward(vector<tensor*> ins, vector<tensor*> ous);
+  virtual void backward(vector<tensor*> ins, vector<tensor*> ous);
+ private:
+  tensor inter_;
 };
 
 }

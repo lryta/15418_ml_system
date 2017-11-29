@@ -1,11 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <algorithm>
 
 #include "data.h"
 
 namespace TinyML {
+
+using std::vector;
+dataIterator::dataIterator() {}
+dataIterator::~dataIterator() {}
 
 int MNISTIterator::reverseInt(int v) {
   unsigned char ch1, ch2, ch3, ch4;
@@ -24,25 +29,32 @@ void MNISTIterator::readInt(std::ifstream &file, int &v) {
 }
 
 MNISTIterator::MNISTIterator(std::string dir, int batch_num):
-  data_wth_taget_(0), shuffled_pos_(0), batch_num_(batch_num), pos_(0) {
+  shuffled_pos_(0), batch_num_(batch_num), pos_(0) {
   makeDataAndLabel(dir);
   initShuffleData();
 }
 
+MNISTIterator::~MNISTIterator() {
+  for (int i = 0; i < data_with_target_.size(); ++i) {
+    delete std::get<0>(data_with_target_[i]);
+    delete std::get<1>(data_with_target_[i]);
+  }
+}
+
 void MNISTIterator::initShuffleData() {
-  for (int i = 0; i < data_wth_taget_.size(); ++i)
+  for (int i = 0; i < data_with_target_.size(); ++i)
     shuffled_pos_.push_back(i);
 }
 
-void MNISTIterator::makeDataAndLabel(string dir) {
+void MNISTIterator::makeDataAndLabel(std::string dir) {
 
   std::string data_path = dir + "/train-images-idx3-ubyte";
   std::string label_path = dir + "/train-labels-idx1-ubyte";
   
-  std::ifstream data_file(data_path.c_str(), ios::binary);
-  std::ifstream label_file(label_path.c_str(), ios::binary);
+  std::ifstream data_file(data_path.c_str(), std::ios::binary);
+  std::ifstream label_file(label_path.c_str(), std::ios::binary);
 
-  if (file.is_open()) {
+  if (data_file.is_open() && label_file.is_open()) {
     int magic_n, data_num, label_num;
     int row_num, col_num=0;
     readInt(data_file, magic_n);
@@ -68,7 +80,7 @@ void MNISTIterator::makeDataAndLabel(string dir) {
     int batch_idx = 0;
     unsigned char value=0;
 
-    for(int img_idx = 0; img_idx < number_of_images; ++img_idx) {
+    for(int img_idx = 0; img_idx < data_num; ++img_idx) {
       for(int pixel_idx = 0 ; pixel_idx < in_dim_; ++pixel_idx) {
         data_file.read((char*)&value, sizeof(value));
         datas->at(batch_idx)[pixel_idx]= (float)value;
@@ -76,7 +88,7 @@ void MNISTIterator::makeDataAndLabel(string dir) {
 
       label_file.read((char*)&value, sizeof(value));
       assert(value >= 0 && value < out_dim_);
-      labels->at(batch_idx).fill(labels->at(batch_idx).begin(),
+      std::fill(labels->at(batch_idx).begin(),
           labels->at(batch_idx).end(), 0);
       labels->at(batch_idx)[value] = 1;
 
@@ -85,14 +97,15 @@ void MNISTIterator::makeDataAndLabel(string dir) {
       if (batch_idx == batch_num_) {
         auto data_tensor = new tensor(datas);
         auto label_tensor = new tensor(labels);
-        data_wth_taget_.push_back(std::make_tuple(data_tensor, label_tensor));
+        data_with_target_.push_back(std::make_tuple(data_tensor, label_tensor));
         batch_idx = 0;
       }
     }
 
     delete datas;
     delete labels;
-  }
+  } else
+    throw "not valid inputs files for dataset";
 }
 
 void MNISTIterator::reset() {

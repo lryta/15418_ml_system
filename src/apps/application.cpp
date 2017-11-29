@@ -1,6 +1,7 @@
 #include "apps/application.h"
 #include "modelTrainer.h"
 #include "optimizer.h"
+#include "net.h"
 
 namespace TinyML {
 
@@ -11,7 +12,7 @@ runMLP::runMLP():train_config_(NULL), trainer_(NULL), opt_config_(NULL) {
   opt_config_ = new optimizerConfig(1e-4);
   trainer_ = new modelTrainer(train_config_);
   // Two layers
-  trainer_->setModel(ModelType::MLPnet, {100, 50});
+  trainer_->setModel(ModelType::MLPnetType, {100, 50});
   trainer_->setOptimizer(*opt_config_);
 }
 

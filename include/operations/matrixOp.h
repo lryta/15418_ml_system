@@ -116,7 +116,7 @@ namespace matrix{
    *   - predicts (row, col)
    *   - targets (row, col)
    */
-  int getCorrectlyRecognized(float* predicts, float* targets, int row, int col, float lowThresh, float highThresh);
+  int getCorrectlyRecognized(float* predicts, float* targets, int row, int col);
 
   /* softmax
    *  Apply softmax operation

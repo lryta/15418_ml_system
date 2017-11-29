@@ -14,47 +14,52 @@ class dataIterator {
  public:
   dataIterator();
   ~dataIterator();
-  virtual std::tuple<tensor*, tensor*> next();
-  virtual bool getNext();
-  virtual shape getDataShape();
-  virtual shape getTargetShape();
-  virtual int getDataDim();
-  virtual int getTargetDim();
-  virtual void reset();
+  virtual std::tuple<tensor*, tensor*> next() = 0;
+  virtual bool hasNext() = 0;
+  virtual shape getDataShape() = 0;
+  virtual shape getTargetShape() = 0;
+  virtual int getDataDim() = 0;
+  virtual int getTargetDim() = 0;
+  virtual void reset() = 0;
 };
 
-class MNISTIterator:dataIterator {
+class MNISTIterator: public dataIterator {
  public:
   MNISTIterator(std::string dataset_dir, int batch_num);
+  ~MNISTIterator();
 
-  shape getDataShape() {
+  virtual shape getDataShape() {
     // Make sure the data is read to memory
     assert(data_with_target_.size() > 0);
     return shape(batch_num_, in_dim_);
   }
 
-  shape getTargetShape() {
+  virtual shape getTargetShape() {
     // Make sure the data is read to memory
     assert(data_with_target_.size() > 0);
     return shape(batch_num_, out_dim_);
   }
 
-  bool hasNext() {
+  virtual bool hasNext() {
     return pos_ < shuffled_pos_.size();
   }
   
-  std::tuple<tensor*, tensor*> next() {
+  virtual std::tuple<tensor*, tensor*> next() {
     assert(pos_ < shuffled_pos_.size());
     return data_with_target_[shuffled_pos_[pos_++]];
   }
 
-  int getDataDim() {
+  virtual int getDataDim() {
     return in_dim_;
   }
 
-  int getTargetDim() {
+  virtual int getTargetDim() {
     return out_dim_;
   }
+
+  void makeDataAndLabel(std::string dir);
+
+  virtual void reset();
 
  private:
   int reverseInt(int);

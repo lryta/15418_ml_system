@@ -1,5 +1,8 @@
-#include<math.h>
-#include<operations/MatrixOp.h>
+#include <cassert>
+#include <math.h>
+#include <stdlib.h>
+
+#include "operations/matrixOp.h"
 
 namespace TinyML{
 
@@ -21,8 +24,7 @@ namespace matrix{
    */
   void gemm(float *alpha, float *beta, float *omega, float *gamma,
       size_t gamma_row, size_t dim_num, size_t gamma_col,
-      bool t_alpha = false,  bool t_beta = false,
-      float a = 1, float b = 1) {
+      bool t_alpha,  bool t_beta, float a, float b) {
     float value;
     for (size_t i = 0; i < gamma_row; ++i)
       for (size_t j = 0; j < gamma_col; ++j) {
@@ -122,7 +124,7 @@ namespace matrix{
    *   - beta (row, col)
    */
   void linearOp(float* alpha, float* beta, int row,
-      int col, float scale, float bias = 0) {
+      int col, float scale, float bias) {
     for (int i = 0; i < row; ++i)
       for (int j = 0; j < col; ++j)
         beta[pos(i, j, col)] = alpha[pos(i, j, col)] * scale + bias;
@@ -162,10 +164,10 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void linearOpInplace(float* alpha, float* beta, int row, int col, float a, float b, float c = 0) {
+  void linearOpInplace(float* alpha, float* beta, int row, int col, float a, float b, float c) {
     for (int i = 0; i < row; ++i)
       for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] = beta[pos(i, j, col)] * a
+        beta[pos(i, j, col)] = beta[pos(i, j, col)] * a +
           alpha[pos(i, j, col)] * b + c;
   }
 
@@ -177,8 +179,8 @@ namespace matrix{
    *   - targets (row, col)
    */
   int getCorrectlyRecognized(float* predicts, float* targets, int row, int col) {
-    int matched_num = 0, max_p_idx, max_p_idx;
-    float max_p_value,  max_p_value;
+    int matched_num = 0, max_p_idx, max_t_idx;
+    float max_p_value, max_t_value;
 
     for (int i = 0; i < row; ++i) {
       max_p_value = predicts[pos(i, 0, col)];
@@ -216,9 +218,9 @@ namespace matrix{
     for (int i = 0; i < row; ++i) {
       float sum = 0;
       for (int j = 0; j < col; ++j)
-        sum += exp(alph[pos(i, j, col)]);
+        sum += exp(alpha[pos(i, j, col)]);
       for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] = exp(alph[pos(i, j, col)]) / sum;
+        beta[pos(i, j, col)] = exp(alpha[pos(i, j, col)]) / sum;
     }
   }
 
@@ -235,7 +237,7 @@ namespace matrix{
     float loss = 0;
     for (int i = 0; i < row; ++i)
       for (int j = 0; j < col; ++j)
-        loss += targets[pos(i, j, col)] * log(alph[pos(i, j, col)]);
+        loss += targets[pos(i, j, col)] * log(predicts[pos(i, j, col)]);
     return -loss;
   }
 

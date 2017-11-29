@@ -11,10 +11,10 @@ namespace TinyML {
 class trainerConfig {
  public:
   trainerConfig(int e, int b, std::string dir):
-    epochNum_(e), batchNum_(b), dataset_dir_(dir) {}
+    epoch_num_(e), batch_num_(b), dataset_dir_(dir) {}
 
-  int epochNum_;
-  int batchNum_;
+  int epoch_num_;
+  int batch_num_;
   std::string dataset_dir_;
 };
 
@@ -22,8 +22,9 @@ class trainerConfig {
 class modelTrainer {
  public:
   modelTrainer(trainerConfig*);
+  ~modelTrainer();
 
-  void setModel(ModelType, std::vector<int>);
+  void setModel(ModelType, std::vector<size_t>);
   void setOptimizer(optimizerConfig);
 
   void train();
@@ -33,7 +34,7 @@ class modelTrainer {
 
   net* net_;
   optimizer* weight_updater_;
-  dataIterator* train_iter_;
+  dataIterator* data_iter_;
   trainerConfig config_;
 };
 

@@ -7,8 +7,8 @@ namespace TinyML {
 
 class application {
  public:
-  application();
-  virtual void run();
+  application() {}
+  virtual void run() {}
 };
 
 class runMLP : application {

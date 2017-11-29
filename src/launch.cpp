@@ -1,4 +1,4 @@
-#include "include/apps/application.h"
+#include "apps/application.h"
 
 int main() {
   auto app = new TinyML::runMLP();
