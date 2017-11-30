@@ -9,17 +9,18 @@ using std::vector;
 tensor::tensor():shape_(0), data_(NULL), grad_(NULL)
   {}
 
-tensor::tensor(shape s):shape_(s), grad_(NULL) {
+tensor::tensor(shape s):shape_(s), data_(NULL), grad_(NULL) {
   data_ = (float*) calloc(shape_.getTotal(), sizeof(float));
 }
 
-tensor::tensor(vector<float> *v):shape_{v->size()} {
+tensor::tensor(vector<float> *v):shape_{v->size()}, data_(NULL), grad_(NULL) {
   data_ = (float*) malloc(shape_.getTotal() * sizeof(float));
   for (int i = 0; i < v->size(); ++i)
     data_[i] = v->at(i);
 }
 
-tensor::tensor(vector<vector<float>> *v):shape_{v->size(), v->at(0).size()} {
+tensor::tensor(vector<vector<float>> *v):shape_{v->size(), v->at(0).size()},
+  data_(NULL), grad_(NULL) {
   data_ = (float*) malloc(shape_.getTotal() * sizeof(float));
   int cnt = -1;
   for (int i = 0; i < v->size(); ++i)
