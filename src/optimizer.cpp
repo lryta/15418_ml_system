@@ -3,7 +3,7 @@
 namespace TinyML {
 
 SGDOptimizer::SGDOptimizer(optimizerConfig *config):optimizer(), config_(*config),
-  weights_{0}, velocity_{0}
+  weights_(0), velocity_(0)
   {}
 
 void SGDOptimizer::registerParams(std::vector<tensor*> params) {
@@ -35,7 +35,8 @@ void SGDOptimizer::update() {
     // Implace Update
     auto in_shape = weights_[i]->getShape();
     matrix::linearOpInplace(weights_[i]->getData(), weights_[i]->getGrad(),
-        in_shape.getDim(1), in_shape.getDim(2), 1, -config_.lr_);
+        in_shape.getDim(1),
+        (in_shape.getDimNum()>=2)?in_shape.getDim(2):1, 1, -config_.lr_);
   }
 }
 
