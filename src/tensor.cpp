@@ -30,11 +30,11 @@ tensor::tensor(vector<vector<float>> *v):shape_{v->size(), v->at(0).size()},
 
 tensor& tensor::operator=(const tensor& t) {
   if (grad_ != NULL) {
-    delete grad_;
+    free(grad_);
     grad_ = NULL;
   }
   if (data_ != NULL) {
-    delete data_;
+    free(data_);
     data_ = NULL;
   }
   shape_ = t.shape_;
@@ -51,9 +51,9 @@ tensor& tensor::operator=(const tensor& t) {
 
 tensor::~tensor() {
   if (grad_ != NULL)
-    delete grad_;
+    free(grad_);
   if (data_ != NULL)
-    delete data_;
+    free(data_);
 }
 
 shape tensor::getShape() {
