@@ -15,7 +15,9 @@ class layer {
  public:
   // Given the shapes of inputs, infer number & shape of outputs
   // Note: when the number of ous is zero, it means it doens't have an output
-  layer(vector<shape> &ins, vector<shape> &ous) {
+  layer(vector<shape> &ins, vector<shape> &ous) {}
+
+  virtual void init(vector<shape> &ins, vector<shape> &ous) {
     inferShape(ins, ous);
     initWeight(ins, ous);
     initIntermediateState(ins, ous);
