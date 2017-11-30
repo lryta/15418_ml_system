@@ -12,21 +12,17 @@ class negLogLikelilayer: public Losslayer {
     correctlyRecognizedNum_(0), loss_(0)
   {}
 
-  vector<tensor*> getParam() {
-    return {};
-  }
+  vector<tensor*> getParam()
+  { return {}; }
 
-  void initIntermediateState(vector<shape> &ins, vector<shape> &ous) {
-    predict_ = tensor(ins[0]);
-  }
+  void initIntermediateState(vector<shape> &ins, vector<shape> &ous)
+  { predict_ = tensor(ins[0]); }
 
-  float getLoss() {
-    return loss_;
-  }
+  float getLoss()
+  { return loss_; }
 
-  int correctlyRecognizedDataNum() {
-    return correctlyRecognizedNum_;
-  }
+  int correctlyRecognizedDataNum()
+  { return correctlyRecognizedNum_; }
 
   virtual void forward(vector<tensor*> ins, vector<tensor*> ous);
   virtual void backward(vector<tensor*> ins, vector<tensor*> ous);
