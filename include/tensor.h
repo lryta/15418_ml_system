@@ -14,6 +14,7 @@ class tensor {
   tensor(shape s);
   tensor(std::vector<float> *v);
   tensor(std::vector<std::vector<float>> *v);
+  tensor& operator=(const tensor&);
   tensor(const tensor&) = delete;
 
   ~tensor();
