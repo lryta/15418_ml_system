@@ -7,6 +7,7 @@ namespace TinyML {
 void negLogLikelilayer::forward(vector<tensor*> ins, vector<tensor*> ous) {
   assert(ous.size() == 0);
   assert(ins[0]->getShape() == ins[1]->getShape());
+  assert(ins[0]->getShape() == predict_.getShape());
   auto in_shape = ins[0]->getShape();
 
   // predict = softmax(in)

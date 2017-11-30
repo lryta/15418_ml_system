@@ -26,6 +26,8 @@ void FullyConnectedlayer::forward(vector<tensor*> ins, vector<tensor*> ous) {
   auto bias_shape = bias_.getShape();
   auto w_shape = weight_.getShape();
 
+  assert(in_shape.getDim(1) == out_shape.getDim(1));
+  assert(w_shape.getDim(2) == out_shape.getDim(2));
   assert(in_shape.getDim(2) == w_shape.getDim(1));
   assert(bias_shape.getDim(1) == w_shape.getDim(2));
 
@@ -35,6 +37,8 @@ void FullyConnectedlayer::forward(vector<tensor*> ins, vector<tensor*> ous) {
 }
 
 void FullyConnectedlayer::backward(vector<tensor*> ins, vector<tensor*> ous) {
+  assert(ins.size() > 0);
+  assert(ous.size() > 0);
   auto in_shape = ins[0]->getShape();
   auto w_shape = weight_.getShape();
   auto out_shape = ous[0]->getShape();
