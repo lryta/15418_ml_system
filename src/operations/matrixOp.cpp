@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 #include <math.h>
 #include <stdlib.h>
 
@@ -29,10 +30,11 @@ namespace matrix{
     for (size_t i = 0; i < gamma_row; ++i)
       for (size_t j = 0; j < gamma_col; ++j) {
         value = 0;
-        for (size_t k = 0; k < dim_num; ++k)
+        for (size_t k = 0; k < dim_num; ++k) {
           value += alpha[t_alpha?pos(k, i, gamma_row):pos(i, k, dim_num)]
-            * gamma[t_beta?pos(j, k, dim_num):pos(k, j, gamma_col)];
-        gamma[pos(i, j, gamma_col)] = value * a + (omega!=NULL)?(omega[j] * b):(0);
+            * beta[t_beta?pos(j, k, dim_num):pos(k, j, gamma_col)];
+        }
+        gamma[pos(i, j, gamma_col)] = value * a + ((omega!=NULL)?(omega[j] * b):(0));
       }
   }
 
