@@ -7,7 +7,7 @@ namespace TinyML {
 
 runMLP::runMLP():train_config_(NULL), trainer_(NULL), opt_config_(NULL) {
   // 5 iterations. 128 Batch size
-  train_config_ = new trainerConfig(5, 128, "../datasets");
+  train_config_ = new trainerConfig(5, 128, "datasets");
   // 1e-4 learning rate
   opt_config_ = new optimizerConfig(1e-4);
   trainer_ = new modelTrainer(train_config_);
@@ -16,9 +16,7 @@ runMLP::runMLP():train_config_(NULL), trainer_(NULL), opt_config_(NULL) {
   trainer_->setOptimizer(*opt_config_);
 }
 
-void runMLP::run() {
-  trainer_->train();
-}
+void runMLP::run() { trainer_->train(); }
 
 runMLP::~runMLP() {
   delete trainer_;
