@@ -44,6 +44,7 @@ void modelTrainer::train() {
     throw "setOptimizer() should be called before train()";
 
   for (int i = 0; i < config_.epoch_num_; ++i) {
+    printf("Run iter %d\n", i);
     // Reset iterator at very beginning
     data_iter_->reset();
 
