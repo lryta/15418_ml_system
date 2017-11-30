@@ -1,4 +1,5 @@
 #include "optimizer.h"
+#include "env.h"
 
 namespace TinyML {
 
@@ -15,10 +16,16 @@ void SGDOptimizer::registerParams(std::vector<tensor*> params) {
   }
 }
 
+void SGDOptimizer::randomizeParams() {
+  for (auto &weight : weights_)
+    env::getInstance()->getWeightInit()->uniformInit(weight, -0.5, 0.5);
+
+}
+
 // CR(Haoran): I suggest avoid using velocity at first
 // if we don't have enough time
 void SGDOptimizer::update() {
-  for (int i = 0; i < weights_.size(); ++i) {
+  for (size_t i = 0; i < weights_.size(); ++i) {
     /*
     TODO: Implement velocity
     if (config_.use_monmentum)

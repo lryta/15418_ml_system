@@ -27,6 +27,7 @@ class optimizer {
   virtual void update() = 0;
   virtual void reset() = 0;
   virtual void registerParams(std::vector<tensor*>) = 0;
+  virtual void randomizeParams() = 0;
 };
 
 class SGDOptimizer : public optimizer {
@@ -35,6 +36,7 @@ class SGDOptimizer : public optimizer {
   virtual void update();
   virtual void reset();
   virtual void registerParams(std::vector<tensor*>);
+  virtual void randomizeParams();
 
  private:
   optimizerConfig config_;

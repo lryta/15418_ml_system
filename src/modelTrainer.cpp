@@ -37,6 +37,7 @@ void modelTrainer::setOptimizer(optimizerConfig config) {
 
   weight_updater_ = new SGDOptimizer(&config);
   weight_updater_->registerParams(net_->getParams());
+  weight_updater_->randomizeParams();
 }
 
 void modelTrainer::train() {
