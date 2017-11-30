@@ -29,6 +29,7 @@ void MNISTIterator::readInt(std::ifstream &file, int &v) {
 }
 
 MNISTIterator::MNISTIterator(std::string dir, int batch_num):
+  data_with_target_(0),
   shuffled_pos_(0), batch_num_(batch_num), pos_(0) {
   makeDataAndLabel(dir);
   initShuffleData();
@@ -47,7 +48,6 @@ void MNISTIterator::initShuffleData() {
 }
 
 void MNISTIterator::makeDataAndLabel(std::string dir) {
-
   std::string data_path = dir + "/train-images-idx3-ubyte";
   std::string label_path = dir + "/train-labels-idx1-ubyte";
   
