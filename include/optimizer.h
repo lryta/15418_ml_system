@@ -10,13 +10,14 @@
 namespace TinyML {
 
 struct optimizerConfig {
-  optimizerConfig(float lr,
+  optimizerConfig(float lr, float reg,
       bool use_m = false, bool m = 0,
       bool use_w = false, bool w = 0): 
-    lr_(lr), use_monmentum_(use_m), use_weightDecay_(use_w),
+    lr_(lr), reg_(reg), use_monmentum_(use_m), use_weightDecay_(use_w),
     momentum_(m), weightDecay_(w) {}
 
   float lr_; // learning rate
+  float reg_; // ratio for regularization
   bool use_monmentum_, use_weightDecay_;
   float momentum_, weightDecay_;
 };
