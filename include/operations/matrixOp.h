@@ -1,6 +1,7 @@
 #ifndef _TINYML_OPERATIONS_MATRIXOP_H
 #define _TINYML_OPERATIONS_MATRIXOP_H
 
+#include<tuple>
 #include<math.h>
 
 namespace TinyML{
@@ -149,6 +150,9 @@ namespace matrix{
   float negLogLikelihood(float* predicts, float* targets, int row, int col);
 
   void normalize(float* data, int row, int col, float mean, float std);
+
+
+  std::tuple<float, float> getStdAndMean(float *data, shape sh);
 }
 }
 

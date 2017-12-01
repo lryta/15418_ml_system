@@ -265,5 +265,18 @@ namespace matrix{
         data[pos(i, j, col)] = (data[pos(i, j, col)] - mean)/std;
   }
 
+  std::tuple<float, float> getStdAndMean(float *data, shape sh) {
+    float mean = 0;
+    float std = 0;
+    size_t total = sh.getTotal();
+    for (size_t i = 0; i < total; ++i)
+      mean += data[i];
+    mean /= total;
+    for (size_t i = 0; i < total; ++i)
+      std += pow(mean - data[i], 2);
+    std = sqrt(std/(total-1));
+    return std::make_tuple(mean, std);
+  }
+
 }
 }
