@@ -1,3 +1,4 @@
+#include <cmath>
 #include "optimizer.h"
 #include "env.h"
 
@@ -17,9 +18,13 @@ void SGDOptimizer::registerParams(std::vector<tensor*> params) {
 }
 
 void SGDOptimizer::randomizeParams() {
-  for (auto &weight : weights_)
-    env::getInstance()->getWeightInit()->uniformInit(weight, -0.5, 0.5);
-
+  for (auto &weight : weights_) {
+    auto w_shape = weight->getShape();
+    if (w_shape.getDimNum() == 1)
+      env::getInstance()->getWeightInit()->normalDistInit(weight, 0, 0.5);
+    else
+      env::getInstance()->getWeightInit()->normalDistInit(weight, 0, 1/(2*sqrt(w_shape.getDim(1))));
+  }
 }
 
 // CR(Haoran): I suggest avoid using velocity at first
@@ -41,9 +46,9 @@ void SGDOptimizer::update() {
 
     // Implace Update
     auto in_shape = weights_[i]->getShape();
-    matrix::linearOpInplace(weights_[i]->getData(), weights_[i]->getGrad(),
+    matrix::UpdateWeightWithReg(weights_[i]->getGrad(), weights_[i]->getData(),
         in_shape.getDim(1),
-        (in_shape.getDimNum()>=2)?in_shape.getDim(2):1, 1, -config_.lr_);
+        (in_shape.getDimNum()>=2)?in_shape.getDim(2):1, config_.lr_, config_.reg_);
   }
 }
 
