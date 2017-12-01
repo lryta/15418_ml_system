@@ -50,12 +50,14 @@ namespace matrix{
     float value = 0;
     if (reduced_dim == 1) {
       for (int i = 0; i < col; ++i) {
+        value = 0;
         for (int j = 0; j < row; ++j)
           value += m[pos(j, i, col)];
         v[i] = value;
       }
     } else {
       for (int i = 0; i < row; ++i) {
+        value = 0;
         for (int j = 0; j < col; ++j)
           value += m[pos(i, j, col)];
         v[i] = value;
@@ -119,7 +121,7 @@ namespace matrix{
   }
 
   /* linearOp
-   *  beta = alpha * b + c
+   *  beta = alpha * scale + bias
    *
    *  Specification:
    *   - alpha (row, col)
@@ -143,7 +145,7 @@ namespace matrix{
   void multiEle(float* alpha, float* beta, float* omega, int row, int col) {
     for (int i = 0; i < row; ++i)
       for (int j = 0; j < col; ++j)
-        omega[pos(i, j, col)] += alpha[pos(i, j, col)] * beta[pos(i, j, col)];
+        omega[pos(i, j, col)] = alpha[pos(i, j, col)] * beta[pos(i, j, col)];
   }
 
   /* multiEleInplace
@@ -160,7 +162,7 @@ namespace matrix{
   }
 
   /* linearOpInplace 
-   *  alpha = alpha * a + beta*b + c
+   *  beta = beta * a + alpha*b + c
    *
    *  Specification:
    *   - alpha (row, col)
@@ -171,6 +173,20 @@ namespace matrix{
       for (int j = 0; j < col; ++j)
         beta[pos(i, j, col)] = beta[pos(i, j, col)] * a +
           alpha[pos(i, j, col)] * b + c;
+  }
+
+  /* UpdateWeightWithReg
+   *  w = w - delta*lr - reg*w
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void UpdateWeightWithReg(float* delta, float* weight, int row, int col, float lr, float reg) {
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        weight[pos(i, j, col)] = weight[pos(i, j, col)]*(1-reg) -
+          delta[pos(i, j, col)] * lr;
   }
 
   /* getCorrectlyRecognized 
@@ -241,6 +257,12 @@ namespace matrix{
       for (int j = 0; j < col; ++j)
         loss += targets[pos(i, j, col)] * log(predicts[pos(i, j, col)]);
     return -loss;
+  }
+
+  void normalize(float* data, int row, int col, float mean, float std) {
+    for (int i = 0; i < row; ++i)
+      for (int j = 0; j < col; ++j)
+        data[pos(i, j, col)] = (data[pos(i, j, col)] - mean)/std;
   }
 
 }

@@ -101,13 +101,22 @@ namespace matrix{
   void sigmoidOp(float* alpha, float* beta, int row, int col);
 
   /* linearOpInplace 
-   *  alpha = alpha * a + beta*b + c
+   *  beta = beta * a + alpha*b + c
    *
    *  Specification:
    *   - alpha (row, col)
    *   - beta (row, col)
    */
   void linearOpInplace(float* alpha, float* beta, int row, int col, float a, float b, float c = 0);
+
+  /* UpdateWeightWithReg
+   *  w = w - delta*lr - reg*w
+   *
+   *  Specification:
+   *   - alpha (row, col)
+   *   - beta (row, col)
+   */
+  void UpdateWeightWithReg(float* delta, float* weight, int row, int col, float lr, float reg);
 
   /* getCorrectlyRecognized 
    *  get total number of correctly recognized value
@@ -139,6 +148,7 @@ namespace matrix{
    */
   float negLogLikelihood(float* predicts, float* targets, int row, int col);
 
+  void normalize(float* data, int row, int col, float mean, float std);
 }
 }
 
