@@ -59,6 +59,8 @@ class MNISTIterator: public dataIterator {
 
   void makeDataAndLabel(std::string dir);
 
+  void preprocess();
+
   virtual void reset();
 
  private:

@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "data.h"
+#include "operations/matrixOp.h"
 
 namespace TinyML {
 
@@ -106,6 +107,43 @@ void MNISTIterator::makeDataAndLabel(std::string dir) {
     delete labels;
   } else
     throw "not valid inputs files for dataset";
+  preprocess();
+}
+
+void MNISTIterator::preprocess() {
+  float mean = 0, std = 0, value;
+  size_t total_num = 0;
+  auto sample_dt = std::get<0>(data_with_target_[0]);
+  auto d_shape = sample_dt->getShape();
+  auto t0 = new tensor(d_shape);
+  auto t1 = new tensor(d_shape);
+
+  for (auto const& dt : data_with_target_) {
+    auto data = std::get<0>(dt);
+    matrix::reduceToValue(data->getData(), &value, d_shape.getDim(1), d_shape.getDim(2));
+    mean += value;
+  }
+  mean /= data_with_target_.size() * d_shape.getTotal();
+
+  for (auto const& dt : data_with_target_) {
+    auto data = std::get<0>(dt);
+    // value - mean
+    matrix::linearOp(data->getData(), t0->getData(), d_shape.getDim(1), d_shape.getDim(2), 1, -mean);
+    matrix::eleSquare(t0->getData(), t1->getData(), d_shape.getDim(1), d_shape.getDim(2));
+    matrix::reduceToValue(t1->getData(), &value, d_shape.getDim(1), d_shape.getDim(2));
+    std += value;
+  }
+
+  std = sqrt(std/(data_with_target_.size() * d_shape.getTotal()));
+  printf("MNIST mean is %f, std is %f\n", mean, std);
+  for (auto const& dt : data_with_target_) {
+    auto data = std::get<0>(dt);
+    // value - mean
+    matrix::normalize(data->getData(), d_shape.getDim(1), d_shape.getDim(2), mean, std);
+  }
+
+  delete t0;
+  delete t1;
 }
 
 void MNISTIterator::reset() {
