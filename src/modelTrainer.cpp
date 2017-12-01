@@ -3,7 +3,7 @@
 namespace TinyML {
 
 modelTrainer::modelTrainer(trainerConfig *config)
-  :config_(*config) {
+  :weight_updater_(NULL), data_iter_(NULL), config_(*config) {
   data_iter_ = new MNISTIterator(config_.dataset_dir_, config_.batch_num_);
 }
 
@@ -44,6 +44,7 @@ void modelTrainer::train() {
   if (weight_updater_ == NULL)
     throw "setOptimizer() should be called before train()";
 
+
   for (int i = 0; i < config_.epoch_num_; ++i) {
     printf("Run iter %d\n", i);
     // Reset iterator at very beginning
@@ -56,6 +57,7 @@ void modelTrainer::train() {
       auto data = data_iter_->next();
       auto input = std::get<0>(data);
       auto target = std::get<1>(data);
+
       // forward
       net_->forward({input}, {target});
       correctly_labelled_num_ += net_->correctlyRecognizedDataNum();
