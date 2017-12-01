@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "shape.h"
 #include "operations/matrixOp.h"
 
 namespace TinyML{
