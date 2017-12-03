@@ -1,0 +1,375 @@
+
+
+#define pos(i, j, col_num) ((col_num) * (i) + (j))
+#define TASK_NUM 32
+
+task void  gemmaIspcTask(uniform float alpha[], uniform float beta[],
+      uniform float omega[], uniform float gamma[],
+      uniform size_t gamma_row, uniform size_t dim_num,
+      uniform size_t gamma_col, uniform bool t_alpha,
+      uniform bool t_beta, uniform float a,
+      uniform float b, uniform size_t gamma_row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * gamma_row_per_task;
+  uniform int yend = min(ystart + row_per_task, gamma_row);
+
+  // TODO: check to reverse the order
+  foreach (j = 0 ... gamma_col, i = ystart ... yend) {
+    float value = 0;
+    for (size_t k = 0; k < dim_num; ++k) {
+      value += alpha[t_alpha?pos(k, i, gamma_row):pos(i, k, dim_num)]
+        * beta[t_beta?pos(j, k, dim_num):pos(k, j, gamma_col)];
+    }
+    gamma[pos(i, j, gamma_col)] = value * a + ((omega!=NULL)?(omega[j] * b):(0));
+  }
+}
+
+export void gemmaIspc(uniform float alpha[], uniform float beta[],
+      uniform float omega[], uniform float gamma[],
+      uniform size_t gamma_row, uniform size_t dim_num,
+      uniform size_t gamma_col, uniform bool t_alpha,
+      uniform bool t_beta, uniform float a,
+      uniform float b)
+{
+  uniform int rowsPerTask = gamma_row / TASK_NUM;
+  // create 32 tasks
+  launch[TASK_NUM] gemmaIspcTask(alpha, beta,
+                             omega, gamma,
+                             gamma_row, dim_num,
+                             gamma_col, t_alpha,
+                             t_beta, a,
+                             b, rowsPerTask); 
+}
+
+task void reduceMatrixIspcTask(uniform float m[], uniform float v[],
+    uniform int row, uniform int col,
+    uniform int reduced_dim, uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task,
+      (reduced_dim == 1)?(col):(row));
+
+  float value = 0;
+  if (reduced_dim == 1) {
+    foreach (i = ystart ... yend) {
+      value = 0;
+      for (int j = 0; j < row; ++j)
+        value += m[pos(j, i, col)];
+      v[i] = value;
+    }
+  } else {
+    foreach (i = ystart ... yend) {
+      value = 0;
+      for (int j = 0; j < col; ++j)
+        value += m[pos(i, j, col)];
+      v[i] = value;
+    }
+  }
+}
+
+export void reduceMatrixIspc(uniform float m[], uniform float v[],
+    uniform int row, uniform int col,
+    uniform int reduced_dim) {
+  uniform int rowsPerTask = (reduced_dim == 1)?(col/TASK_NUM):(row/TASK_NUM);
+
+  launch[TASK_NUM] reduceMatrixIspcTask(m, v,
+      row, col, reduced_dim, rowsPerTask); 
+}
+
+task void eleSubtractIspcTask(uniform float alpha[], uniform float beta[],
+    uniform float omega[], uniform int row, uniform int col,
+    uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    omega[pos(i, j, col)] = alpha[pos(i, j, col)] - beta[pos(i, j, col)];
+  }
+}
+
+export void eleSubtractIspc(uniform float alpha[], uniform float beta[],
+    uniform float omega[], uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] reduceMatrixIspcTask(alpha, beta,
+      row, col, reduced_dim, rowsPerTask); 
+}
+
+task void sigmoidOpIspcTask(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col, uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    beta[pos(i, j, col)] = 1 / (1 + exp(-alpha[pos(i, j, col)]));
+  }
+}
+
+export void sigmoidOpIspc(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] sigmoidOpIspcTask(alpha, beta,
+      row, col, reduced_dim, rowsPerTask); 
+}
+
+task void eleSquareIspcTask(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col, uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    beta[pos(i, j, col)] = pow(alpha[pos(i, j, col)],2);
+  }
+}
+
+export void eleSquareIspc(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] eleSquareIspcTask(alpha, beta,
+      row, col, reduced_dim, rowsPerTask); 
+}
+
+task void reduceToValueIspcTask(uniform float alpha[], uniform float value[],
+    uniform int row, uniform int col, uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+  float sum = 0;
+
+  foreach (j = 0 ...col, i = ystart ... yend) {
+    sum += alpha[pos(i, j, col)];
+  }
+
+  value[0] = reduce_add(sum);
+}
+
+export void reduceToValueIspc(uniform float alpha[], uniform float value[],
+    uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] reduceToValueIspcTask(alpha, value,
+      row, col, rowsPerTask); 
+}
+
+task void linearOpIspcTask(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col, uniform float scale,
+    uniform float bias, uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    beta[pos(i, j, col)] = alpha[pos(i, j, col)] * scale + bias;
+  }
+}
+
+export void linearOpIspc(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col, uniform float scale,
+    uniform float bias) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] linearOpIspcTask(alpha, beta,
+      row, col, scale, bias, rowsPerTask);
+}
+
+task void multiEleIspcTask(uniform float alpha[], uniform float beta[],
+    uniform float omega[], uniform int row, uniform int col,
+    uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    omega[pos(i, j, col)] = alpha[pos(i, j, col)] * beta[pos(i, j, col)];
+  }
+}
+
+export void multiEleIspc(uniform float alpha[], uniform float beta[],
+    uniform float omega[], uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] multiEleIspcTask(alpha, beta,
+      omega, row, col, rowsPerTask);
+}
+
+task void multiEleInplaceIspcTask(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col,
+    uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    beta[pos(i, j, col)] = alpha[pos(i, j, col)] * beta[pos(i, j, col)];
+  }
+}
+
+export void multiEleInplaceIspc(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] multiEleInplaceIspcTask(alpha, beta,
+      row, col, rowsPerTask);
+}
+
+task void negLogLikelihoodIspcTask(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col,
+    uniform int row_per_task, uniform float total_loss[]) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+  float loss = 0;
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    loss += targets[pos(i, j, col)] * log(predicts[pos(i, j, col)]);
+  }
+
+  total_loss[taskIndex] = reduce_add(loss);
+}
+
+export float negLogLikelihoodIspc(uniform float predicts[], uniform float targets[],
+    uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+  uniform float loss[TASK_NUM];
+  uniform float total_loss;
+
+  launch[TASK_NUM]negLogLikelihoodIspcTask(alpha, beta,
+      row, col, rowsPerTask, loss);
+  sync;
+
+  float sum = 0;
+  foreach (i = 0...TASK_NUM)
+    sum += loss[i];
+  total_loss = reduce_add(sum);
+
+  return total_loss;
+}
+
+task void softmaxIspcTask(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col,
+    uniform int row_per_task) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+  uniform float sum = 0;
+
+  float tmp_sum = 0;
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    tmp_sum += exp(alpha[pos(i, j, col)]);
+  }
+
+  sum = reduce_add(tmp_sum);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    beta[pos(i, j, col)] = exp(alpha[pos(i, j, col)]) / sum;
+  }
+}
+
+export void softmaxIspc(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] softmaxIspcTask(alpha, beta,
+      row, col, rowsPerTask);
+}
+
+task void getCorrectlyRecognizedIspcTask(uniform float alpha[],
+    uniform float beta[], uniform int row, uniform int col,
+    uniform int row_per_task, uniform int task_res[]) {
+  // taskIndex is an ISPC built-in
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+  
+  float max_p_value, max_t_value;
+  int max_p_idx, max_t_idx, matched_num = 0;
+
+  foreach (i = ystart ... yend) {
+    max_p_value = predicts[pos(i, 0, col)];
+    max_p_idx = 0;
+    max_t_value = targets[pos(i, 0, col)];
+    max_t_idx = 0;
+
+    for (int j = 1; j < col; ++j) {
+      if (max_p_value < predicts[pos(i, j, col)]) {
+        max_p_value = predicts[pos(i, j, col)];
+        max_p_idx = j;
+      }
+
+      if (max_t_value < targets[pos(i, j, col)]) {
+        max_t_value = targets[pos(i, j, col)];
+        max_t_idx = j;
+      }
+    }
+    matched_num += (max_t_idx == max_p_idx);
+  }
+
+  task_res[taskIndex] = reduce_add(matched_num);
+}
+
+export void getCorrectlyRecognizedIspc(uniform float alpha[],
+    uniform float beta[], uniform int row, uniform int col) {
+  uniform int rowsPerTask = row/TASK_NUM;
+  uniform int total_matched_num = 0;
+  uniform int task_res[TASK_NUM];
+
+  launch[TASK_NUM] getCorrectlyRecognizedIspcTask(alpha, beta,
+      row, col, rowsPerTask);
+
+
+  launch[TASK_NUM]getCorrectlyRecognizedIspcTask(alpha, beta,
+      row, col, rowsPerTask, task_res);
+  sync;
+
+  int matched_num = 0;
+  foreach (i = 0...TASK_NUM)
+    matched_num += task_res[i];
+  total_matched_num = reduce_add(sum);
+
+  return total_matched_num;
+}
+
+task void linearOpInplaceIspcTask(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col, uniform float a,
+    uniform float b, uniform float c uniform int row_per_task) {
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    beta[pos(i, j, col)] = beta[pos(i, j, col)] * a + alpha[pos(i, j, col)] * b + c;
+  }
+}
+
+export void linearOpInplaceIspc(uniform float alpha[], uniform float beta[],
+    uniform int row, uniform int col, uniform float a,
+    uniform float b, uniform float c) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] linearOpInplaceIspcTask(alpha, beta,
+      row, col, a, b, c, rowsPerTask);
+}
+
+task void UpdateWeightWithRegIspcTask(uniform float delta[], uniform float weight[],
+    uniform int row, uniform int col, uniform float lr,
+    uniform float reg, uniform int row_per_task) {
+  uniform int ystart = taskIndex * row_per_task;
+  uniform int yend = min(ystart + row_per_task, row);
+
+  foreach (j = 0 ... col, i = ystart ... yend) {
+    weight[pos(i, j, col)] = weight[pos(i, j, col)]*(1-reg) -
+      delta[pos(i, j, col)] * lr;
+  }
+}
+
+export void UpdateWeightWithRegIspc(uniform float delta[], uniform float weight[],
+    uniform int row, uniform int col, uniform float lr,
+    uniform float reg) {
+  uniform int rowsPerTask = row/TASK_NUM;
+
+  launch[TASK_NUM] UpdateWeightWithRegIspcTask(alpha, beta,
+      row, col, lr, reg, rowsPerTask);
+}
