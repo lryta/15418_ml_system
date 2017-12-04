@@ -7,9 +7,9 @@ task void  gemmaIspcTask(uniform float alpha[], uniform float beta[],
       uniform size_t gamma_row, uniform size_t dim_num,
       uniform size_t gamma_col, uniform bool t_alpha,
       uniform bool t_beta, uniform float a,
-      uniform float b, uniform size_t gamma_row_per_task) {
+      uniform float b, uniform size_t row_per_task) {
   // taskIndex is an ISPC built-in
-  uniform int ystart = taskIndex * gamma_row_per_task;
+  uniform int ystart = taskIndex * row_per_task;
   uniform int yend = min(ystart + row_per_task, gamma_row);
 
   // TODO: check to reverse the order
@@ -92,7 +92,7 @@ export void eleSubtractIspc(uniform float alpha[], uniform float beta[],
   uniform int rowsPerTask = row/TASK_NUM;
 
   launch[TASK_NUM] eleSubtractIspcTask(alpha, beta,
-      row, col, rowsPerTask); 
+      omega, row, col, rowsPerTask); 
 }
 
 task void sigmoidOpIspcTask(uniform float alpha[], uniform float beta[],
@@ -130,7 +130,7 @@ export void eleSquareIspc(uniform float alpha[], uniform float beta[],
   uniform int rowsPerTask = row/TASK_NUM;
 
   launch[TASK_NUM] eleSquareIspcTask(alpha, beta,
-      row, col, reduced_dim, rowsPerTask); 
+      row, col, rowsPerTask); 
 }
 
 task void reduceToValueIspcTask(uniform float alpha[], uniform float task_res[],
@@ -150,13 +150,14 @@ export void reduceToValueIspc(uniform float alpha[], uniform float value[],
     uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
   uniform float task_res[TASK_NUM];
+  uniform float task_num = TASK_NUM;
 
   launch[TASK_NUM] reduceToValueIspcTask(alpha, task_res,
       row, col, rowsPerTask); 
   sync;
 
   float total_value = 0;
-  foreach (i = 0...TASK_NUM)
+  foreach (i = 0...task_num)
     total_value += task_res[i];
   value[0] = reduce_add(total_value);
 }
@@ -237,18 +238,19 @@ task void negLogLikelihoodIspcTask(uniform float predicts[], uniform float targe
   task_loss[taskIndex] = reduce_add(loss);
 }
 
-export float negLogLikelihoodIspc(uniform float predicts[], uniform float targets[],
+export uniform float negLogLikelihoodIspc(uniform float predicts[], uniform float targets[],
     uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
   uniform float task_loss[TASK_NUM];
   uniform float total_loss;
+  uniform float task_num = TASK_NUM;
 
-  launch[TASK_NUM]negLogLikelihoodIspcTask(alpha, beta,
+  launch[TASK_NUM]negLogLikelihoodIspcTask(predicts, targets,
       row, col, rowsPerTask, task_loss);
   sync;
 
   float sum_loss = 0;
-  foreach (i = 0...TASK_NUM)
+  foreach (i = 0...task_num)
     sum_loss += task_loss[i];
   total_loss = reduce_add(sum_loss);
 
@@ -281,8 +283,8 @@ export void softmaxIspc(uniform float alpha[], uniform float beta[],
       row, col, rowsPerTask);
 }
 
-task void getCorrectlyRecognizedIspcTask(uniform float alpha[],
-    uniform float beta[], uniform int row, uniform int col,
+task void getCorrectlyRecognizedIspcTask(uniform float predicts[],
+    uniform float targets[], uniform int row, uniform int col,
     uniform int row_per_task, uniform int task_res[]) {
   // taskIndex is an ISPC built-in
   uniform int ystart = taskIndex * row_per_task;
@@ -313,18 +315,19 @@ task void getCorrectlyRecognizedIspcTask(uniform float alpha[],
   task_res[taskIndex] = reduce_add(matched_num);
 }
 
-export int getCorrectlyRecognizedIspc(uniform float alpha[],
-    uniform float beta[], uniform int row, uniform int col) {
+export uniform int getCorrectlyRecognizedIspc(uniform float predicts[],
+    uniform float targets[], uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
   uniform int total_matched_num;
   uniform int task_res[TASK_NUM];
+  uniform float task_num = TASK_NUM;
 
-  launch[TASK_NUM] getCorrectlyRecognizedIspcTask(alpha, beta,
+  launch[TASK_NUM] getCorrectlyRecognizedIspcTask(predicts, targets,
       row, col, rowsPerTask, task_res);
   sync;
 
   int matched_num = 0;
-  foreach (i = 0...TASK_NUM)
+  foreach (i = 0...task_num)
     matched_num += task_res[i];
   total_matched_num = reduce_add(matched_num);
 
