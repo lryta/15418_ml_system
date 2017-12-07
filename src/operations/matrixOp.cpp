@@ -27,16 +27,13 @@ namespace matrix{
   void gemm(float *alpha, float *beta, float *omega, float *gamma,
       size_t gamma_row, size_t dim_num, size_t gamma_col,
       bool t_alpha,  bool t_beta, float a, float b) {
-    float value;
-    for (size_t i = 0; i < gamma_row; ++i)
-      for (size_t j = 0; j < gamma_col; ++j) {
-        value = 0;
-        for (size_t k = 0; k < dim_num; ++k) {
-          value += alpha[t_alpha?pos(k, i, gamma_row):pos(i, k, dim_num)]
-            * beta[t_beta?pos(j, k, dim_num):pos(k, j, gamma_col)];
-        }
-        gamma[pos(i, j, gamma_col)] = value * a + ((omega!=NULL)?(omega[j] * b):(0));
-      }
+#ifdef COMPILE_ISPC
+    gemmISPC(alpha, beta, omega, gamma, gamma_row,
+        dim_num, gamma_col, t_alpha, t_beta, a, b);
+#else
+    gemmCPU(alpha, beta, omega, gamma, gamma_row,
+        dim_num, gamma_col, t_alpha, t_beta, a, b);
+#endif
   }
 
 
@@ -48,22 +45,11 @@ namespace matrix{
    */
   void reduceMatrix(float* m, float* v, int row, int col, int reduced_dim) {
     assert(reduced_dim <= 2);
-    float value = 0;
-    if (reduced_dim == 1) {
-      for (int i = 0; i < col; ++i) {
-        value = 0;
-        for (int j = 0; j < row; ++j)
-          value += m[pos(j, i, col)];
-        v[i] = value;
-      }
-    } else {
-      for (int i = 0; i < row; ++i) {
-        value = 0;
-        for (int j = 0; j < col; ++j)
-          value += m[pos(i, j, col)];
-        v[i] = value;
-      }
-    }
+#ifdef COMPILE_ISPC
+    reduceMatrixISPC(m, v, row, col, reduced_dim);
+#else
+    reduceMatrixCPU(m, v, row, col, reduced_dim);
+#endif
   }
 
   /* Subtract two matrixes
@@ -76,9 +62,11 @@ namespace matrix{
    */
   void eleSubtract(float* alpha, float* beta,
       float* omega, int row, int col) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        omega[pos(i, j, col)] = alpha[pos(i, j, col)] - beta[pos(i, j, col)];
+#ifdef COMPILE_ISPC
+    eleSubtractISPC(alpha, beta, omega, row, col);
+#else
+    eleSubtractCPU(alpha, beta, omega, row, col);
+#endif
   }
 
   /* sigmoidOp 
@@ -89,9 +77,11 @@ namespace matrix{
    *   - beta (row, col)
    */
   void sigmoidOp(float* alpha, float* beta, int row, int col) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] = 1 / (1 + exp(-alpha[pos(i, j, col)]));
+#ifdef COMPILE_ISPC
+    sigmoidOpISPC(alpha, beta, row, col);
+#else
+    sigmoidOpCPU(alpha, beta, row, col);
+#endif
   }
 
   /* Element Square matrixes
@@ -102,9 +92,11 @@ namespace matrix{
    *   - beta (row, col)
    */
   void eleSquare(float* alpha, float* beta, int row, int col) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] = pow(alpha[pos(i, j, col)],2);
+#ifdef COMPILE_ISPC
+    eleSquareISPC(alpha, beta, row, col);
+#else
+    eleSquareCPU(alpha, beta, row, col);
+#endif
   }
 
   /* reduceToValue
@@ -114,11 +106,11 @@ namespace matrix{
    *   - alpha (row, col)
    */
   void reduceToValue(float* alpha, float* value, int row, int col) {
-    float tmp = 0;
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        tmp += alpha[pos(i, j, col)];
-    *value = tmp;
+#ifdef COMPILE_ISPC
+    reduceToValueISPC(alpha, value, row, col);
+#else
+    reduceToValueCPU(alpha, value, row, col);
+#endif
   }
 
   /* linearOp
@@ -130,9 +122,11 @@ namespace matrix{
    */
   void linearOp(float* alpha, float* beta, int row,
       int col, float scale, float bias) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] = alpha[pos(i, j, col)] * scale + bias;
+#ifdef COMPILE_ISPC
+    linearOpISPC(alpha, beta, row, col, scale, bias);
+#else
+    linearOpCPU(alpha, beta, row, col, scale, bias);
+#endif
   }
 
   /* multiEle 
@@ -144,9 +138,11 @@ namespace matrix{
    *   - omega (row, col)
    */
   void multiEle(float* alpha, float* beta, float* omega, int row, int col) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        omega[pos(i, j, col)] = alpha[pos(i, j, col)] * beta[pos(i, j, col)];
+#ifdef COMPILE_ISPC
+    multiEleISPC(alpha, beta, omega, row, col);
+#else
+    multiEleCPU(alpha, beta, omega, row, col);
+#endif
   }
 
   /* multiEleInplace
@@ -157,9 +153,11 @@ namespace matrix{
    *   - beta  (row, col)
    */
   void multiEleInplace(float* alpha, float* beta, int row, int col) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] *= alpha[pos(i, j, col)];
+#ifdef COMPILE_ISPC
+    multiEleInplaceISPC(alpha, beta, row, col);
+#else
+    multiEleInplaceCPU(alpha, beta, row, col);
+#endif
   }
 
   /* linearOpInplace 
@@ -170,10 +168,11 @@ namespace matrix{
    *   - beta (row, col)
    */
   void linearOpInplace(float* alpha, float* beta, int row, int col, float a, float b, float c) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] = beta[pos(i, j, col)] * a +
-          alpha[pos(i, j, col)] * b + c;
+#ifdef COMPILE_ISPC
+    linearOpInplaceISPC(alpha, beta, row, col, a, b, c);
+#else
+    linearOpInplaceCPU(alpha, beta, row, col, a, b, c);
+#endif
   }
 
   /* UpdateWeightWithReg
@@ -184,10 +183,11 @@ namespace matrix{
    *   - beta (row, col)
    */
   void UpdateWeightWithReg(float* delta, float* weight, int row, int col, float lr, float reg) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        weight[pos(i, j, col)] = weight[pos(i, j, col)]*(1-reg) -
-          delta[pos(i, j, col)] * lr;
+#ifdef COMPILE_ISPC
+    UpdateWeightWithRegISPC(delta, weight, row, col, lr, reg);
+#else
+    UpdateWeightWithRegCPU(delta, weight, row, col, lr, reg);
+#endif
   }
 
   /* getCorrectlyRecognized 
@@ -198,31 +198,11 @@ namespace matrix{
    *   - targets (row, col)
    */
   int getCorrectlyRecognized(float* predicts, float* targets, int row, int col) {
-    int matched_num = 0, max_p_idx, max_t_idx;
-    float max_p_value, max_t_value;
-
-    for (int i = 0; i < row; ++i) {
-      max_p_value = predicts[pos(i, 0, col)];
-      max_p_idx = 0;
-      max_t_value = targets[pos(i, 0, col)];
-      max_t_idx = 0;
-
-      for (int j = 1; j < col; ++j) {
-        if (max_p_value < predicts[pos(i, j, col)]) {
-          max_p_value = predicts[pos(i, j, col)];
-          max_p_idx = j;
-        }
-
-        if (max_t_value < targets[pos(i, j, col)]) {
-          max_t_value = targets[pos(i, j, col)];
-          max_t_idx = j;
-        }
-      }
-      matched_num += (max_t_idx == max_p_idx);
-
-    }
-
-    return matched_num;
+#ifdef COMPILE_ISPC
+    return getCorrectlyRecognizedISPC(predicts, targets, row, col);
+#else
+    return getCorrectlyRecognizedCPU(predicts, targets, row, col);
+#endif
   }
 
   /* softmax
@@ -234,13 +214,11 @@ namespace matrix{
    *   - beta (row, col)
    */
   void softmax(float* alpha, float* beta, int row, int col) {
-    for (int i = 0; i < row; ++i) {
-      float sum = 0;
-      for (int j = 0; j < col; ++j)
-        sum += exp(alpha[pos(i, j, col)]);
-      for (int j = 0; j < col; ++j)
-        beta[pos(i, j, col)] = exp(alpha[pos(i, j, col)]) / sum;
-    }
+#ifdef COMPILE_ISPC
+    softmaxISPC(alpha, beta, row, col);
+#else
+    softmaxCPU(alpha, beta, row, col);
+#endif
   }
 
   /* negLogLikelihood
@@ -253,30 +231,24 @@ namespace matrix{
    *   - beta (row, col)
    */
   float negLogLikelihood(float* predicts, float* targets, int row, int col) {
-    float loss = 0;
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        loss += targets[pos(i, j, col)] * log(predicts[pos(i, j, col)]);
-    return -loss;
+#ifdef COMPILE_ISPC
+    return negLogLikelihoodISPC(predicts, targets, row, col);
+#else
+    return negLogLikelihoodCPU(predicts, targets, row, col);
+#endif
   }
 
   void normalize(float* data, int row, int col, float mean, float std) {
-    for (int i = 0; i < row; ++i)
-      for (int j = 0; j < col; ++j)
-        data[pos(i, j, col)] = (data[pos(i, j, col)] - mean)/std;
+#ifdef COMPILE_ISPC
+    normalizeISPC(data, row, col, mean, std);
+#else
+    normalizeCPU(data, row, col, mean, std);
+#endif
   }
 
   std::tuple<float, float> getStdAndMean(float *data, shape sh) {
-    float mean = 0;
-    float std = 0;
-    size_t total = sh.getTotal();
-    for (size_t i = 0; i < total; ++i)
-      mean += data[i];
-    mean /= total;
-    for (size_t i = 0; i < total; ++i)
-      std += pow(mean - data[i], 2);
-    std = sqrt(std/(total-1));
-    return std::make_tuple(mean, std);
+    // No ISPC impl
+    return getStdAndMeanCPU(data, sh);
   }
 
 }

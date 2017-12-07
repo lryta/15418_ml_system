@@ -1,16 +1,8 @@
-#ifndef _TINYML_OPERATIONS_MATRIXOP_H
-#define _TINYML_OPERATIONS_MATRIXOP_H
+#ifndef _TINYML_OPERATIONS_MATRIXOPCPU_H
+#define _TINYML_OPERATIONS_MATRIXOPCPU_H
 
 #include<tuple>
 #include<math.h>
-
-#include"env.h"
-
-#ifdef COMPILE_ISPC
-#include "operations/matrixOpISPC.h"
-#else  // COMPILE_ISPC
-#include "operations/matrixOpCPU.h"
-#endif // COMPILE_ISPC
 
 namespace TinyML{
 
@@ -30,7 +22,7 @@ namespace matrix{
    * Description:
    *  - Omega could be NULL
    */
-  void gemm(float *alpha, float *beta, float *omega, float *gamma,
+  void gemmCPU(float *alpha, float *beta, float *omega, float *gamma,
       size_t gamma_row, size_t dim_num, size_t gamma_col,
       bool t_alpha = false,  bool t_beta = false,
       float a = 1, float b = 1);
@@ -42,7 +34,7 @@ namespace matrix{
    *   - m (row, col)
    *   - v (row) if reduced_dim is 2, else (col)
    */
-  void reduceMatrix(float* m, float* v, int row, int col, int reduced_dim);
+  void reduceMatrixCPU(float* m, float* v, int row, int col, int reduced_dim);
 
   /* Subtract two matrixes
    *  omega = alpha - beta
@@ -52,7 +44,7 @@ namespace matrix{
    *   - beta (row, col)
    *   - omegarow, col)
    */
-  void eleSubtract(float* alpha, float* beta,
+  void eleSubtractCPU(float* alpha, float* beta,
       float* omega, int row, int col);
 
   /* Element Square matrixes
@@ -62,7 +54,7 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void eleSquare(float* alpha, float* beta, int row, int col);
+  void eleSquareCPU(float* alpha, float* beta, int row, int col);
 
   /* reduceToValue
    *  v = sum(alpha)
@@ -70,7 +62,7 @@ namespace matrix{
    *  Specification:
    *   - alpha (row, col)
    */
-  void reduceToValue(float* alpha, float* value, int row, int col);
+  void reduceToValueCPU(float* alpha, float* value, int row, int col);
 
   /* linearOp
    *  beta = alpha * b + c
@@ -79,7 +71,7 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void linearOp(float* alpha, float* beta, int row, int col, float scale, float bias = 0);
+  void linearOpCPU(float* alpha, float* beta, int row, int col, float scale, float bias = 0);
 
   /* multiEle 
    *  omega = alpha * beta
@@ -89,7 +81,7 @@ namespace matrix{
    *   - beta  (row, col)
    *   - omega (row, col)
    */
-  void multiEle(float* alpha, float* beta, float* omega, int row, int col);
+  void multiEleCPU(float* alpha, float* beta, float* omega, int row, int col);
 
   /* multiEleInplace
    *  beta = alpha * beta
@@ -98,7 +90,7 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta  (row, col)
    */
-  void multiEleInplace(float* alpha, float* beta, int row, int col);
+  void multiEleInplaceCPU(float* alpha, float* beta, int row, int col);
 
   /* sigmoidOp 
    *  beta = 1 / (1 + exp(-alpha))
@@ -107,7 +99,7 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void sigmoidOp(float* alpha, float* beta, int row, int col);
+  void sigmoidOpCPU(float* alpha, float* beta, int row, int col);
 
   /* linearOpInplace 
    *  beta = beta * a + alpha*b + c
@@ -116,7 +108,7 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void linearOpInplace(float* alpha, float* beta, int row, int col, float a, float b, float c = 0);
+  void linearOpInplaceCPU(float* alpha, float* beta, int row, int col, float a, float b, float c = 0);
 
   /* UpdateWeightWithReg
    *  w = w - delta*lr - reg*w
@@ -125,7 +117,7 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void UpdateWeightWithReg(float* delta, float* weight, int row, int col, float lr, float reg);
+  void UpdateWeightWithRegCPU(float* delta, float* weight, int row, int col, float lr, float reg);
 
   /* getCorrectlyRecognized 
    *  get total number of correctly recognized value
@@ -134,7 +126,7 @@ namespace matrix{
    *   - predicts (row, col)
    *   - targets (row, col)
    */
-  int getCorrectlyRecognized(float* predicts, float* targets, int row, int col);
+  int getCorrectlyRecognizedCPU(float* predicts, float* targets, int row, int col);
 
   /* softmax
    *  Apply softmax operation
@@ -144,7 +136,7 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  void softmax(float* alpha, float* beta, int row, int col);
+  void softmaxCPU(float* alpha, float* beta, int row, int col);
 
   /* negLogLikelihood
    *  Apply negLogLikelihood operation
@@ -155,12 +147,12 @@ namespace matrix{
    *   - alpha (row, col)
    *   - beta (row, col)
    */
-  float negLogLikelihood(float* predicts, float* targets, int row, int col);
+  float negLogLikelihoodCPU(float* predicts, float* targets, int row, int col);
 
-  void normalize(float* data, int row, int col, float mean, float std);
+  void normalizeCPU(float* data, int row, int col, float mean, float std);
 
 
-  std::tuple<float, float> getStdAndMean(float *data, shape sh);
+  std::tuple<float, float> getStdAndMeanCPU(float *data, shape sh);
 }
 }
 

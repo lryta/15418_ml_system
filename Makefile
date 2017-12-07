@@ -12,6 +12,13 @@ else
         QUIET_ECHO = @ echo
 endif
 
+# uncomment this to compile ISPC
+# COMPILE_ISPC :=
+ifndef COMPILE_ISPC
+	ISPC=ispc
+	ISPCFLAGS=-O2 --target=sse4-x2 --arch=x86-64
+endif
+
 # --------------------------------------------------------------------------
 # BUILD directory
 ifndef BUILD
@@ -21,7 +28,6 @@ ifndef BUILD
         BUILD := build
     endif
 endif
-
 
 # --------------------------------------------------------------------------
 # Setup TinyML flags 
@@ -41,7 +47,7 @@ ifndef CFLAGS
     endif
 endif
 
-CFLAGS += -std=c++11 -Wall  -Wshadow -Wextra -Iinclude
+CFLAGS += -std=c++11 -Wall  -Wshadow -Wextra -Iinclude -Iobj
 
 LDFLAGS := 
 MYFLAGS :=
@@ -65,6 +71,15 @@ $(BUILD)/obj/%.o: src/%.cpp
         -o $(BUILD)/dep/$(<:%.cpp=%.d) -c $<
 	@ mkdir -p $(dir $@)
 	$(VERBOSE_SHOW) g++ $(MYFLAGS) $(CFLAGS) -o $@ -c $<
+
+ifdef COMPILE_ISPC 
+$(BUILD)/obj/operations/matrixOp.o: $(BUILD)/obj/operations/matrixOpISPC.h
+
+$(BUILD)/obj/operations/%ISPC.h $(BUILD)/obj/operations/%ISPC.o: src/operations/%.ISPC
+	@mkdir -p $(BUILD)/obj/operations
+	$(ISPC) $(ISPCFLAGS) $< -o $(BUILD)/obj/operations/$*ISPC.o -h $(BUILD)/obj/operations/$*ISPC.h
+
+endif
 
 # --------------------------------------------------------------------------
 # TinyML targets
