@@ -1,3 +1,4 @@
+#include <chrono>
 #include "modelTrainer.h"
 
 namespace TinyML {
@@ -57,6 +58,8 @@ void modelTrainer::train() {
       auto data = data_iter_->next();
       auto input = std::get<0>(data);
       auto target = std::get<1>(data);
+      auto start = std::chrono::system_clock::now();
+ 
 
       // forward
       net_->forward({input}, {target});
@@ -67,6 +70,11 @@ void modelTrainer::train() {
       // back prop and update weight
       net_->backward({input}, {target});
       weight_updater_->update();
+
+      auto end = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = end-start;
+      
+      printf("seconds is %f\n", elapsed_seconds.count());
     }
 
     printf("Total Accuracy in epoch %d is %f\n",
