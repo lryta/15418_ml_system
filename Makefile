@@ -13,10 +13,19 @@ else
 endif
 
 # uncomment this to compile ISPC
-# COMPILE_ISPC :=
-ifndef COMPILE_ISPC
-	ISPC=ispc
-	ISPCFLAGS=-O2 --target=sse4-x2 --arch=x86-64
+COMPILE_ISPC := 1
+ifeq ($(COMPILE_ISPC),1)
+ISPC=ispc
+ISPCFLAGS=-O2 --target=sse4-x2 --arch=x86-64
+COMMONDIR=common
+
+TASKSYS_CXX=$(COMMONDIR)/tasksys.cpp
+TASKSYS_LIB=-lpthread
+TASKSYS_OBJ=$(addprefix $(BUILD)/obj/, $(subst $(COMMONDIR)/,, $(TASKSYS_CXX:.cpp=.o)))
+else
+TASKSYS_CXX:=
+TASKSYS_LIB:=-lpthread
+TASKSYS_OBJ:=
 endif
 
 # --------------------------------------------------------------------------
@@ -47,12 +56,16 @@ ifndef CFLAGS
     endif
 endif
 
-CFLAGS += -std=c++11 -Wall  -Wshadow -Wextra -Iinclude -Iobj
+CFLAGS += -std=c++11 -Wall  -Wshadow -Wextra -Iinclude -I$(BUILD)/obj
 
 LDFLAGS := 
 MYFLAGS :=
-#	MYFLAGS = -D USE_LRU_ALGO -D NOT_DO_COMPRESS
 LIBRARY :=
+
+ifeq ($(COMPILE_ISPC),1)
+MYFLAGS := $(MYFLAGS) -DCOMPILE_ISPC 
+LIBRARY := $(LIBRARY) $(TASKSYS_LIB)
+endif
 # LIBRARY = -ls3 -lcurl -lxml2
 
 # --------------------------------------------------------------------------
@@ -61,25 +74,53 @@ LIBRARY :=
 .PHONY: all
 all: tinyml
 
-# --------------------------------------------------------------------------
-# Compile target patterns
-
 $(BUILD)/obj/%.o: src/%.cpp
 	$(QUIET_ECHO) $@: Compiling object
 	@ mkdir -p $(dir $(BUILD)/dep/$<)
-	@ g++ $(MYFLAGS) $(CFLAGS) -M -MG -MQ $@ -DCOMPILINGDEPENDENCIES \
+	@ g++ $(CFLAGS) $(MYFLAGS) -M -MG -MQ $@ -DCOMPILINGDEPENDENCIES \
         -o $(BUILD)/dep/$(<:%.cpp=%.d) -c $<
 	@ mkdir -p $(dir $@)
-	$(VERBOSE_SHOW) g++ $(MYFLAGS) $(CFLAGS) -o $@ -c $<
+	$(VERBOSE_SHOW) g++ $(CFLAGS) $(MYFLAGS) -o $@ -c $<
 
-ifdef COMPILE_ISPC 
-$(BUILD)/obj/operations/matrixOp.o: $(BUILD)/obj/operations/matrixOpISPC.h
+# --------------------------------------------------------------------------
+# Compile target patterns
+ifeq ($(COMPILE_ISPC),1)
+$(BUILD)/obj/operations/matrixOp.o: src/operations/matrixOp.cpp $(BUILD)/obj/operations/matrixOpISPC.h
+	$(QUIET_ECHO) $@: Compiling object
+	@ mkdir -p $(dir $(BUILD)/dep/$<)
+	@ g++ $(CFLAGS) $(MYFLAGS) -M -MG -MQ $@ -DCOMPILINGDEPENDENCIES \
+	      -o $(BUILD)/dep/$(<:%.cpp=%.d) -c $<
+	@ mkdir -p $(dir $@)
+	$(VERBOSE_SHOW) g++ $(CFLAGS) $(MYFLAGS) -o $@ -c $<
 
-$(BUILD)/obj/operations/%ISPC.h $(BUILD)/obj/operations/%ISPC.o: src/operations/%.ISPC
+$(BUILD)/obj/%.o: $(COMMONDIR)/%.cpp
+	$(QUIET_ECHO) $@: Compiling object
+	@ mkdir -p $(dir $(BUILD)/dep/$<)
+	@ g++ $(CFLAGS) $(MYFLAGS) -M -MG -MQ $@ -DCOMPILINGDEPENDENCIES \
+        -o $(BUILD)/dep/$(<:%.cpp=%.d) -c $<
+	@ mkdir -p $(dir $@)
+	$(VERBOSE_SHOW) g++ $(CFLAGS) $(MYFLAGS) -o $@ -c $<
+
+$(BUILD)/obj/sys.o: src/operations/matrixOp.cpp $(BUILD)/obj/operations/matrixOpISPC.h
+	$(QUIET_ECHO) $@: Compiling object
+	@ mkdir -p $(dir $(BUILD)/dep/$<)
+	@ g++ $(CFLAGS) $(MYFLAGS) -M -MG -MQ $@ -DCOMPILINGDEPENDENCIES \
+	      -o $(BUILD)/dep/$(<:%.cpp=%.d) -c $<
+	@ mkdir -p $(dir $@)
+	$(VERBOSE_SHOW) g++ $(CFLAGS) $(MYFLAGS) -o $@ -c $<
+
+$(BUILD)/obj/operations/%ISPC.h $(BUILD)/obj/operations/%ISPC.o: src/operations/%.ispc
 	@mkdir -p $(BUILD)/obj/operations
+	echo "command is" $(ISPC)
 	$(ISPC) $(ISPCFLAGS) $< -o $(BUILD)/obj/operations/$*ISPC.o -h $(BUILD)/obj/operations/$*ISPC.h
 
+$operations/matrixOpISPC.h :$(BUILD)/obj/operations/%ISPC.h
+
+ISPC_OBJS := $(BUILD)/obj/operations/matrixOpISPC.o
+else # COMIPLE_ISPC
+ISPC_OBJS :=
 endif
+
 
 # --------------------------------------------------------------------------
 # TinyML targets
@@ -90,7 +131,7 @@ tinyml : $(BUILD)/bin/tinyml
 SRC = $(wildcard src/*/*.cpp src/*.cpp)
 TINYML_OBJS = $(patsubst src/%.cpp, $(BUILD)/obj/%.o, $(SRC))
 
-$(BUILD)/bin/tinyml: $(TINYML_OBJS)
+$(BUILD)/bin/tinyml: $(TINYML_OBJS) $(ISPC_OBJS) $(TASKSYS_OBJ)
 	$(QUIET_ECHO) $@: Building executable
 	@ mkdir -p $(dir $@)
 	$(VERBOSE_SHOW) g++ -o $@ $^ $(LDFLAGS) $(LIBRARY) 

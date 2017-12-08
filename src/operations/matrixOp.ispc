@@ -2,7 +2,7 @@
 #define min(x, y)  (((x)<(y))?(x):(y))
 #define TASK_NUM 32
 
-task void  gemmaIspcTask(uniform float alpha[], uniform float beta[],
+task void  gemmISPCTask(uniform float alpha[], uniform float beta[],
       uniform float omega[], uniform float gamma[],
       uniform size_t gamma_row, uniform size_t dim_num,
       uniform size_t gamma_col, uniform bool t_alpha,
@@ -23,7 +23,7 @@ task void  gemmaIspcTask(uniform float alpha[], uniform float beta[],
   }
 }
 
-export void gemmaIspc(uniform float alpha[], uniform float beta[],
+export void gemmISPC(uniform float alpha[], uniform float beta[],
       uniform float omega[], uniform float gamma[],
       uniform size_t gamma_row, uniform size_t dim_num,
       uniform size_t gamma_col, uniform bool t_alpha,
@@ -32,7 +32,7 @@ export void gemmaIspc(uniform float alpha[], uniform float beta[],
 {
   uniform int rowsPerTask = gamma_row / TASK_NUM;
   // create 32 tasks
-  launch[TASK_NUM] gemmaIspcTask(alpha, beta,
+  launch[TASK_NUM] gemmISPCTask(alpha, beta,
                              omega, gamma,
                              gamma_row, dim_num,
                              gamma_col, t_alpha,
@@ -40,7 +40,7 @@ export void gemmaIspc(uniform float alpha[], uniform float beta[],
                              b, rowsPerTask); 
 }
 
-task void reduceMatrixIspcTask(uniform float m[], uniform float v[],
+task void reduceMatrixISPCTask(uniform float m[], uniform float v[],
     uniform int row, uniform int col,
     uniform int reduced_dim, uniform int row_per_task) {
   // taskIndex is an ISPC built-in
@@ -66,16 +66,16 @@ task void reduceMatrixIspcTask(uniform float m[], uniform float v[],
   }
 }
 
-export void reduceMatrixIspc(uniform float m[], uniform float v[],
+export void reduceMatrixISPC(uniform float m[], uniform float v[],
     uniform int row, uniform int col,
     uniform int reduced_dim) {
   uniform int rowsPerTask = (reduced_dim == 1)?(col/TASK_NUM):(row/TASK_NUM);
 
-  launch[TASK_NUM] reduceMatrixIspcTask(m, v,
+  launch[TASK_NUM] reduceMatrixISPCTask(m, v,
       row, col, reduced_dim, rowsPerTask); 
 }
 
-task void eleSubtractIspcTask(uniform float alpha[], uniform float beta[],
+task void eleSubtractISPCTask(uniform float alpha[], uniform float beta[],
     uniform float omega[], uniform int row, uniform int col,
     uniform int row_per_task) {
   // taskIndex is an ISPC built-in
@@ -87,15 +87,15 @@ task void eleSubtractIspcTask(uniform float alpha[], uniform float beta[],
   }
 }
 
-export void eleSubtractIspc(uniform float alpha[], uniform float beta[],
+export void eleSubtractISPC(uniform float alpha[], uniform float beta[],
     uniform float omega[], uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] eleSubtractIspcTask(alpha, beta,
+  launch[TASK_NUM] eleSubtractISPCTask(alpha, beta,
       omega, row, col, rowsPerTask); 
 }
 
-task void sigmoidOpIspcTask(uniform float alpha[], uniform float beta[],
+task void sigmoidOpISPCTask(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col, uniform int row_per_task) {
   // taskIndex is an ISPC built-in
   uniform int ystart = taskIndex * row_per_task;
@@ -106,15 +106,15 @@ task void sigmoidOpIspcTask(uniform float alpha[], uniform float beta[],
   }
 }
 
-export void sigmoidOpIspc(uniform float alpha[], uniform float beta[],
+export void sigmoidOpISPC(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] sigmoidOpIspcTask(alpha, beta,
+  launch[TASK_NUM] sigmoidOpISPCTask(alpha, beta,
       row, col, rowsPerTask); 
 }
 
-task void eleSquareIspcTask(uniform float alpha[], uniform float beta[],
+task void eleSquareISPCTask(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col, uniform int row_per_task) {
   // taskIndex is an ISPC built-in
   uniform int ystart = taskIndex * row_per_task;
@@ -125,15 +125,15 @@ task void eleSquareIspcTask(uniform float alpha[], uniform float beta[],
   }
 }
 
-export void eleSquareIspc(uniform float alpha[], uniform float beta[],
+export void eleSquareISPC(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] eleSquareIspcTask(alpha, beta,
+  launch[TASK_NUM] eleSquareISPCTask(alpha, beta,
       row, col, rowsPerTask); 
 }
 
-task void reduceToValueIspcTask(uniform float alpha[], uniform float task_res[],
+task void reduceToValueISPCTask(uniform float alpha[], uniform float task_res[],
     uniform int row, uniform int col, uniform int row_per_task) {
   uniform int ystart = taskIndex * row_per_task;
   uniform int yend = min(ystart + row_per_task, row);
@@ -146,13 +146,13 @@ task void reduceToValueIspcTask(uniform float alpha[], uniform float task_res[],
   task_res[taskIndex] = reduce_add(sum);
 }
 
-export void reduceToValueIspc(uniform float alpha[], uniform float value[],
+export void reduceToValueISPC(uniform float alpha[], uniform float value[],
     uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
   uniform float task_res[TASK_NUM];
   uniform float task_num = TASK_NUM;
 
-  launch[TASK_NUM] reduceToValueIspcTask(alpha, task_res,
+  launch[TASK_NUM] reduceToValueISPCTask(alpha, task_res,
       row, col, rowsPerTask); 
   sync;
 
@@ -162,7 +162,7 @@ export void reduceToValueIspc(uniform float alpha[], uniform float value[],
   value[0] = reduce_add(total_value);
 }
 
-task void linearOpIspcTask(uniform float alpha[], uniform float beta[],
+task void linearOpISPCTask(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col, uniform float scale,
     uniform float bias, uniform int row_per_task) {
   // taskIndex is an ISPC built-in
@@ -174,16 +174,16 @@ task void linearOpIspcTask(uniform float alpha[], uniform float beta[],
   }
 }
 
-export void linearOpIspc(uniform float alpha[], uniform float beta[],
+export void linearOpISPC(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col, uniform float scale,
     uniform float bias) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] linearOpIspcTask(alpha, beta,
+  launch[TASK_NUM] linearOpISPCTask(alpha, beta,
       row, col, scale, bias, rowsPerTask);
 }
 
-task void multiEleIspcTask(uniform float alpha[], uniform float beta[],
+task void multiEleISPCTask(uniform float alpha[], uniform float beta[],
     uniform float omega[], uniform int row, uniform int col,
     uniform int row_per_task) {
   // taskIndex is an ISPC built-in
@@ -195,15 +195,15 @@ task void multiEleIspcTask(uniform float alpha[], uniform float beta[],
   }
 }
 
-export void multiEleIspc(uniform float alpha[], uniform float beta[],
+export void multiEleISPC(uniform float alpha[], uniform float beta[],
     uniform float omega[], uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] multiEleIspcTask(alpha, beta,
+  launch[TASK_NUM] multiEleISPCTask(alpha, beta,
       omega, row, col, rowsPerTask);
 }
 
-task void multiEleInplaceIspcTask(uniform float alpha[], uniform float beta[],
+task void multiEleInplaceISPCTask(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col,
     uniform int row_per_task) {
   // taskIndex is an ISPC built-in
@@ -215,15 +215,15 @@ task void multiEleInplaceIspcTask(uniform float alpha[], uniform float beta[],
   }
 }
 
-export void multiEleInplaceIspc(uniform float alpha[], uniform float beta[],
+export void multiEleInplaceISPC(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] multiEleInplaceIspcTask(alpha, beta,
+  launch[TASK_NUM] multiEleInplaceISPCTask(alpha, beta,
       row, col, rowsPerTask);
 }
 
-task void negLogLikelihoodIspcTask(uniform float predicts[], uniform float targets[],
+task void negLogLikelihoodISPCTask(uniform float predicts[], uniform float targets[],
     uniform int row, uniform int col,
     uniform int row_per_task, uniform float task_loss[]) {
   // taskIndex is an ISPC built-in
@@ -235,17 +235,17 @@ task void negLogLikelihoodIspcTask(uniform float predicts[], uniform float targe
     loss += targets[pos(i, j, col)] * log(predicts[pos(i, j, col)]);
   }
 
-  task_loss[taskIndex] = reduce_add(loss);
+  task_loss[taskIndex] = -reduce_add(loss);
 }
 
-export uniform float negLogLikelihoodIspc(uniform float predicts[], uniform float targets[],
+export uniform float negLogLikelihoodISPC(uniform float predicts[], uniform float targets[],
     uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
   uniform float task_loss[TASK_NUM];
   uniform float total_loss;
   uniform float task_num = TASK_NUM;
 
-  launch[TASK_NUM]negLogLikelihoodIspcTask(predicts, targets,
+  launch[TASK_NUM]negLogLikelihoodISPCTask(predicts, targets,
       row, col, rowsPerTask, task_loss);
   sync;
 
@@ -257,7 +257,7 @@ export uniform float negLogLikelihoodIspc(uniform float predicts[], uniform floa
   return total_loss;
 }
 
-task void softmaxIspcTask(uniform float alpha[], uniform float beta[],
+task void softmaxISPCTask(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col,
     uniform int row_per_task) {
   // taskIndex is an ISPC built-in
@@ -275,15 +275,15 @@ task void softmaxIspcTask(uniform float alpha[], uniform float beta[],
 
 }
 
-export void softmaxIspc(uniform float alpha[], uniform float beta[],
+export void softmaxISPC(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] softmaxIspcTask(alpha, beta,
+  launch[TASK_NUM] softmaxISPCTask(alpha, beta,
       row, col, rowsPerTask);
 }
 
-task void getCorrectlyRecognizedIspcTask(uniform float predicts[],
+task void getCorrectlyRecognizedISPCTask(uniform float predicts[],
     uniform float targets[], uniform int row, uniform int col,
     uniform int row_per_task, uniform int task_res[]) {
   // taskIndex is an ISPC built-in
@@ -315,14 +315,14 @@ task void getCorrectlyRecognizedIspcTask(uniform float predicts[],
   task_res[taskIndex] = reduce_add(matched_num);
 }
 
-export uniform int getCorrectlyRecognizedIspc(uniform float predicts[],
+export uniform int getCorrectlyRecognizedISPC(uniform float predicts[],
     uniform float targets[], uniform int row, uniform int col) {
   uniform int rowsPerTask = row/TASK_NUM;
   uniform int total_matched_num;
   uniform int task_res[TASK_NUM];
   uniform float task_num = TASK_NUM;
 
-  launch[TASK_NUM] getCorrectlyRecognizedIspcTask(predicts, targets,
+  launch[TASK_NUM] getCorrectlyRecognizedISPCTask(predicts, targets,
       row, col, rowsPerTask, task_res);
   sync;
 
@@ -334,7 +334,7 @@ export uniform int getCorrectlyRecognizedIspc(uniform float predicts[],
   return total_matched_num;
 }
 
-task void linearOpInplaceIspcTask(uniform float alpha[], uniform float beta[],
+task void linearOpInplaceISPCTask(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col, uniform float a,
     uniform float b, uniform float c, uniform int row_per_task) {
   uniform int ystart = taskIndex * row_per_task;
@@ -345,16 +345,16 @@ task void linearOpInplaceIspcTask(uniform float alpha[], uniform float beta[],
   }
 }
 
-export void linearOpInplaceIspc(uniform float alpha[], uniform float beta[],
+export void linearOpInplaceISPC(uniform float alpha[], uniform float beta[],
     uniform int row, uniform int col, uniform float a,
     uniform float b, uniform float c) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] linearOpInplaceIspcTask(alpha, beta,
+  launch[TASK_NUM] linearOpInplaceISPCTask(alpha, beta,
       row, col, a, b, c, rowsPerTask);
 }
 
-task void UpdateWeightWithRegIspcTask(uniform float delta[], uniform float weight[],
+task void UpdateWeightWithRegISPCTask(uniform float delta[], uniform float weight[],
     uniform int row, uniform int col, uniform float lr,
     uniform float reg, uniform int row_per_task) {
   uniform int ystart = taskIndex * row_per_task;
@@ -366,11 +366,11 @@ task void UpdateWeightWithRegIspcTask(uniform float delta[], uniform float weigh
   }
 }
 
-export void UpdateWeightWithRegIspc(uniform float delta[], uniform float weight[],
+export void UpdateWeightWithRegISPC(uniform float delta[], uniform float weight[],
     uniform int row, uniform int col, uniform float lr,
     uniform float reg) {
   uniform int rowsPerTask = row/TASK_NUM;
 
-  launch[TASK_NUM] UpdateWeightWithRegIspcTask(delta, weight,
+  launch[TASK_NUM] UpdateWeightWithRegISPCTask(delta, weight,
       row, col, lr, reg, rowsPerTask);
 }
