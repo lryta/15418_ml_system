@@ -8,9 +8,9 @@
 
 #ifdef COMPILE_ISPC
 #include "operations/matrixOpISPC.h"
-#else  // COMPILE_ISPC
-#include "operations/matrixOpCPU.h"
 #endif // COMPILE_ISPC
+
+#include "operations/matrixOpCPU.h"
 
 namespace TinyML{
 
