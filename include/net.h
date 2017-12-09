@@ -20,12 +20,16 @@ class net {
   virtual float getLoss() = 0;
   virtual int correctlyRecognizedDataNum() = 0;
 
+  virtual vector<layer*> getLayers() = 0;
   virtual vector<tensor*> getParams() = 0;
+  virtual vector<size_t> getParamIdToLayerIdMap() = 0;
+  virtual void printTimeStat() = 0;
 };
 
 class MLPnet : public net {
  public:
-  MLPnet(shape in_shape, shape target_shape, vector<size_t> hidden_dims):net() {
+  MLPnet(shape in_shape, shape target_shape, vector<size_t> hidden_dims)
+    :net() {
     buildlayers(in_shape, target_shape, hidden_dims);
   }
   ~MLPnet();
@@ -36,13 +40,23 @@ class MLPnet : public net {
   virtual int correctlyRecognizedDataNum();
   virtual float getLoss();
 
-  std::vector<tensor*> getParams();
+  virtual vector<layer*> getLayers() {
+    return layers_;
+  }
+  virtual vector<tensor*> getParams();
+  virtual vector<size_t> getParamIdToLayerIdMap();
+
+  virtual void printTimeStat() {
+    for (size_t i = 0; i < layers_.size(); ++i)
+      layers_[i]->printTimeStat();
+  }
 
  private:
   void buildlayers(shape in_shape, shape target_shape, vector<size_t> hidden_dims);
 
-  std::vector<layer*> layers_;
-  std::vector<tensor*> intermediate_tensors_, params_;
+  vector<layer*> layers_;
+  vector<tensor*> intermediate_tensors_, params_;
+  vector<size_t> param_id_to_layer_id_;
 };
 
 }

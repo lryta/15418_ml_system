@@ -27,7 +27,9 @@ class optimizer {
   optimizer() {}
   virtual void update() = 0;
   virtual void reset() = 0;
-  virtual void registerParams(std::vector<tensor*>) = 0;
+  virtual void registerParams(std::vector<layer*>,
+    std::vector<tensor*>,
+    std::vector<size_t>) = 0;
   virtual void randomizeParams() = 0;
 };
 
@@ -36,12 +38,16 @@ class SGDOptimizer : public optimizer {
   SGDOptimizer(optimizerConfig *);
   virtual void update();
   virtual void reset();
-  virtual void registerParams(std::vector<tensor*>);
+  virtual void registerParams(std::vector<layer*>,
+    std::vector<tensor*>,
+    std::vector<size_t>);
   virtual void randomizeParams();
 
  private:
   optimizerConfig config_;
   std::vector<tensor*> weights_;
+  std::vector<layer*> layers_;
+  std::vector<size_t> param_id_map_layer_id_;
   std::vector<tensor*> velocity_;
 };
 

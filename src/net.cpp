@@ -54,13 +54,24 @@ void MLPnet::buildlayers(shape in_shape, shape target_shape, vector<size_t> hidd
 
 vector<tensor*> MLPnet::getParams() {
   if (params_.size() == 0) {
-    for (auto const& layer : layers_) {
-      vector<tensor*> layer_params = layer->getParam();
+    for (size_t i = 0; i < layers_.size(); ++i) {
+      auto layer_params = layers_[i]->getParam();
       params_.insert(params_.end(), layer_params.begin(), layer_params.end());
     }
   }
 
   return params_;
+}
+
+vector<size_t> MLPnet::getParamIdToLayerIdMap() {
+  if (param_id_to_layer_id_.size() == 0) {
+    for (size_t i = 0; i < layers_.size(); ++i) {
+      vector<size_t> ids(layers_[i]->getParam().size(), i);
+      param_id_to_layer_id_.insert(param_id_to_layer_id_.end(),
+          ids.begin(), ids.end());
+    }
+  }
+  return param_id_to_layer_id_;
 }
 
 MLPnet::~MLPnet() {
@@ -75,9 +86,9 @@ void MLPnet::forward(vector<tensor*> ins, vector<tensor*> targets) {
   assert(layers_.size() >= 2);
 
   for (int i = 0; i <= (int)layers_.size() - 2; ++i)
-    layers_[i]->forward({(i == 0)?(ins[0]):(intermediate_tensors_[i-1])}, {intermediate_tensors_[i]});
+    layers_[i]->Forward({(i == 0)?(ins[0]):(intermediate_tensors_[i-1])}, {intermediate_tensors_[i]});
 
-  layers_.back()->forward({intermediate_tensors_[layers_.size()-2], targets[0]}, {});
+  layers_.back()->Forward({intermediate_tensors_[layers_.size()-2], targets[0]}, {});
 }
 
 int MLPnet::correctlyRecognizedDataNum() {
@@ -89,10 +100,10 @@ float MLPnet::getLoss() {
 }
 
 void MLPnet::backward(vector<tensor*> ins, vector<tensor*> targets) {
-  layers_.back()->backward({intermediate_tensors_[layers_.size()-2], targets[0]}, {});
+  layers_.back()->Backward({intermediate_tensors_[layers_.size()-2], targets[0]}, {});
 
   for (int i = ((int)layers_.size()) - 2; i >= 0; --i)
-    layers_[i]->backward({(i == 0)?(ins[0]):(intermediate_tensors_[i-1])}, {intermediate_tensors_[i]});
+    layers_[i]->Backward({(i == 0)?(ins[0]):(intermediate_tensors_[i-1])}, {intermediate_tensors_[i]});
 }
 
 }

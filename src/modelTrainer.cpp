@@ -37,7 +37,7 @@ void modelTrainer::setOptimizer(optimizerConfig config) {
     throw "setModel() should be called before setOptimizer()";
 
   weight_updater_ = new SGDOptimizer(&config);
-  weight_updater_->registerParams(net_->getParams());
+  weight_updater_->registerParams(net_->getLayers(), net_->getParams(), net_->getParamIdToLayerIdMap());
   weight_updater_->randomizeParams();
 }
 
@@ -70,6 +70,8 @@ void modelTrainer::train() {
       // back prop and update weight
       net_->backward({input}, {target});
       weight_updater_->update();
+      net_->printTimeStat();
+
 
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end-start;
