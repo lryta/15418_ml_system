@@ -16,7 +16,8 @@ endif
 COMPILE_ISPC := 1
 ifeq ($(COMPILE_ISPC),1)
 ISPC=ispc
-ISPCFLAGS=-O2 --target=sse4-x2 --arch=x86-64
+#ISPCFLAGS=-O2 --target=sse4-i32x8 --arch=x86-64
+ISPCFLAGS=-O2 --target=avx2-i32x8 --arch=x86-64
 COMMONDIR=common
 
 TASKSYS_CXX=$(COMMONDIR)/tasksys.cpp
