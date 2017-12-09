@@ -13,7 +13,7 @@ task void  gemmISPCTask(uniform float alpha[], uniform float beta[],
   uniform int yend = min(ystart + row_per_task, gamma_row);
 
   // TODO: check to reverse the order
-  foreach (j = 0 ... gamma_col, i = ystart ... yend) {
+  foreach (i = ystart ... yend, j = 0 ... gamma_col) {
     float value = 0;
     for (size_t k = 0; k < dim_num; ++k) {
       value += alpha[t_alpha?pos(k, i, gamma_row):pos(i, k, dim_num)]
