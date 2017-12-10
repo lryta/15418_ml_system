@@ -54,7 +54,11 @@ void modelTrainer::train() {
     labelled_num_ = 0;
     correctly_labelled_num_ = 0;
 
+    std::chrono::duration<double> total_time;
+    int batch_cnt = 0;
+
     while (data_iter_->hasNext()) {
+      ++batch_cnt;
       auto data = data_iter_->next();
       auto input = std::get<0>(data);
       auto target = std::get<1>(data);
@@ -74,10 +78,11 @@ void modelTrainer::train() {
 
 
       auto end = std::chrono::system_clock::now();
-      std::chrono::duration<double> elapsed_seconds = end-start;
+      total_time += end-start;
       
-      printf("seconds is %f\n", elapsed_seconds.count());
     }
+
+    printf("avg ms per batch is %f\n", total_time.count()/batch_cnt);
 
     printf("Total Accuracy in epoch %d is %f\n",
         i + 1, (float)correctly_labelled_num_/labelled_num_);
