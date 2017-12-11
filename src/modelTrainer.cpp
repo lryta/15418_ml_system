@@ -74,7 +74,7 @@ void modelTrainer::train() {
       // back prop and update weight
       net_->backward({input}, {target});
       weight_updater_->update();
-      net_->printTimeStat();
+      net_->collectTimeStat();
 
 
       auto end = std::chrono::system_clock::now();
@@ -82,7 +82,8 @@ void modelTrainer::train() {
       
     }
 
-    printf("avg ms per batch is %f\n", total_time.count()/batch_cnt);
+    net_->printAvgTimeStat();
+    printf("avg training per batch is %f ms\n", total_time.count()*1000/(batch_cnt * config_.epoch_num_));
 
     printf("Total Accuracy in epoch %d is %f\n",
         i + 1, (float)correctly_labelled_num_/labelled_num_);

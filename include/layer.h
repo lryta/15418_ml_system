@@ -20,6 +20,10 @@ class layer {
   layer(vector<shape> &ins, vector<shape> &ous) {}
 
   virtual void init(vector<shape> &ins, vector<shape> &ous) {
+    cnt_ = 0;
+    forward_avg_time_ = 0;
+    backward_avg_time_ = 0;
+    update_avg_time_ = 0;
     inferShape(ins, ous);
     initWeight(ins, ous);
     initIntermediateState(ins, ous);
@@ -44,11 +48,18 @@ class layer {
     backward_wall_time_ = std::chrono::system_clock::now() - op_start_time_;
   }
 
-  void printTimeStat() const {
+  void collectTimeStat() {
+    ++cnt_;
+    forward_avg_time_ += forward_wall_time_.count();
+    backward_avg_time_ += backward_wall_time_.count();
+    update_avg_time_ += update_wall_time_.count();
+  }
+
+  void printAvgTimeStat() {
     printf("forward %f ms, backward %f ms, update %f ms\n",
-        forward_wall_time_.count() * 1000,
-        backward_wall_time_.count() * 1000,
-        update_wall_time_.count() * 1000);
+        forward_avg_time_ * 1000/cnt_,
+        backward_avg_time_ * 1000/cnt_,
+        update_avg_time_ * 1000/cnt_);
   }
 
   void resetUpdateWeightTime() {
@@ -64,6 +75,8 @@ class layer {
   }
 
  private:
+  size_t cnt_;
+  float forward_avg_time_, backward_avg_time_, update_avg_time_;
   std::chrono::time_point<std::chrono::system_clock> op_start_time_;
   std::chrono::duration<float> forward_wall_time_,
     backward_wall_time_, update_wall_time_;

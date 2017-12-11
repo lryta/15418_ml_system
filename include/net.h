@@ -23,7 +23,8 @@ class net {
   virtual vector<layer*> getLayers() = 0;
   virtual vector<tensor*> getParams() = 0;
   virtual vector<size_t> getParamIdToLayerIdMap() = 0;
-  virtual void printTimeStat() = 0;
+  virtual void collectTimeStat() = 0;
+  virtual void printAvgTimeStat() = 0;
 };
 
 class MLPnet : public net {
@@ -46,9 +47,14 @@ class MLPnet : public net {
   virtual vector<tensor*> getParams();
   virtual vector<size_t> getParamIdToLayerIdMap();
 
-  virtual void printTimeStat() {
+  virtual void collectTimeStat() {
     for (size_t i = 0; i < layers_.size(); ++i)
-      layers_[i]->printTimeStat();
+      layers_[i]->collectTimeStat();
+  }
+
+  void printAvgTimeStat() {
+    for (size_t i = 0; i < layers_.size(); ++i)
+      layers_[i]->printAvgTimeStat();
   }
 
  private:
