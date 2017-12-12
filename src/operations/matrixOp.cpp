@@ -5,6 +5,7 @@
 
 #include "shape.h"
 #include "operations/matrixOp.h"
+#include "operations/matrixOpGPU.h"
 
 namespace TinyML{
 
@@ -27,15 +28,19 @@ namespace matrix{
   void gemm(float *alpha, float *beta, float *omega, float *gamma,
       size_t gamma_row, size_t dim_num, size_t gamma_col,
       bool t_alpha,  bool t_beta, float a, float b) {
-#ifdef COMPILE_ISPC
-    ispc::gemmISPC(alpha, beta, omega, gamma, gamma_row,
-        dim_num, gamma_col, t_alpha, t_beta, a, b);
-#else
-    gemmCPU(alpha, beta, omega, gamma, gamma_row,
-        dim_num, gamma_col, t_alpha, t_beta, a, b);
-#endif
+  #ifdef COMPILE_CUDA
+      gemmGPU(alpha, beta, omega, gamma, gamma_row,
+          dim_num, gamma_col, t_alpha, t_beta, a, b);
+  #else //COMPILE_CUDA
+    #ifdef COMPILE_ISPC
+        ispc::gemmISPC(alpha, beta, omega, gamma, gamma_row,
+            dim_num, gamma_col, t_alpha, t_beta, a, b);
+    #else //COMPILE_ISPC
+        gemmCPU(alpha, beta, omega, gamma, gamma_row,
+            dim_num, gamma_col, t_alpha, t_beta, a, b);
+    #endif //COMPILE_ISPC
+  #endif //COMPILE_CUDA
   }
-
 
   /* Reduce matrix to vector
    *

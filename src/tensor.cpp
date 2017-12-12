@@ -6,21 +6,21 @@
 namespace TinyML {
 using std::vector;
 
-tensor::tensor():shape_(0), data_(NULL), grad_(NULL)
+tensor::tensor():shape_(0), data_(NULL), grad_(NULL), data_gpu_(NULL), grad_gpu_(NULL)
   {}
 
-tensor::tensor(shape s):shape_(s), data_(NULL), grad_(NULL) {
+tensor::tensor(shape s):shape_(s), data_(NULL), grad_(NULL), data_gpu_(NULL), grad_gpu_(NULL) {
   data_ = (float*) calloc(shape_.getTotal(), sizeof(float));
 }
 
-tensor::tensor(vector<float> *v):shape_{v->size()}, data_(NULL), grad_(NULL) {
+tensor::tensor(vector<float> *v):shape_{v->size()}, data_(NULL), grad_(NULL), data_gpu_(NULL), grad_gpu_(NULL) {
   data_ = (float*) malloc(shape_.getTotal() * sizeof(float));
   for (int i = 0; i < v->size(); ++i)
     data_[i] = v->at(i);
 }
 
 tensor::tensor(vector<vector<float>> *v):shape_{v->size(), v->at(0).size()},
-  data_(NULL), grad_(NULL) {
+  data_(NULL), grad_(NULL), data_gpu_(NULL), grad_gpu_(NULL) {
   data_ = (float*) malloc(shape_.getTotal() * sizeof(float));
   int cnt = -1;
   for (int i = 0; i < v->size(); ++i)
@@ -37,6 +37,15 @@ tensor& tensor::operator=(const tensor& t) {
     free(data_);
     data_ = NULL;
   }
+
+#ifdef COMPILE_CUDA
+  assert(data_gpu_ == NULL);
+  assert(grad_gpu_ == NULL);
+
+  assert(t.data_gpu_ == NULL);
+  assert(t.grad_gpu_ == NULL);
+#endif
+
   shape_ = t.shape_;
   if (t.data_ != NULL) {
     data_ = (float*) malloc(shape_.getTotal() * sizeof(float));
@@ -72,5 +81,6 @@ float* tensor::getGrad() {
     grad_ = (float*) calloc(shape_.getTotal(), sizeof(float));
   return grad_;
 }
+
 
 }

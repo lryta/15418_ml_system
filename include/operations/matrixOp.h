@@ -35,7 +35,6 @@ namespace matrix{
       bool t_alpha = false,  bool t_beta = false,
       float a = 1, float b = 1);
 
-
   /* Reduce matrix to vector
    *
    *  Specification:

@@ -19,15 +19,27 @@ class tensor {
 
   ~tensor();
 
+  
+
   shape getShape();
   // TODO: extended to support GPU pointer
   // e.g. getCPUData. getGPUGrad
   float* getData();
   float* getGrad();
 
+#ifdef COMPILE_CUDA
+  float* getGPUData();
+  float* getGPUGrad();
+  void SyncDataGPUToCPU();
+  void SyncDataCPUToGPU();
+  void SyncGradGPUToCPU();
+  void SyncGradCPUToGPU();
+#endif
+
  private:
   shape shape_;
   float *data_, *grad_;
+  float *data_gpu_, *grad_gpu_;
 };
 
 }

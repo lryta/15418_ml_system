@@ -13,7 +13,25 @@ else
 endif
 
 # uncomment this to compile ISPC
-COMPILE_ISPC := 1
+COMPILE_CUDA := 1
+ifeq ($(COMPILE_CUDA),1)
+
+CUDALDFLAGS:=-L/usr/local/depot/cuda-8.0/lib64/ -lcudart
+CUDALIBS := GL glut cudart
+CUDALDLIBS  := $(addprefix -l, $(CUDALIBS))
+
+NVCC=nvcc
+NVCCFLAGS= -std=c++11 -O3 -m64 --gpu-architecture compute_35 -Iinclude/ -DCOMPILE_CUDA
+
+else
+CUDALDFLAGS:=
+CUDALIBS       :=
+CUDALDLIBS  :=
+
+endif
+
+# uncomment this to compile ISPC
+# COMPILE_ISPC := 1
 ifeq ($(COMPILE_ISPC),1)
 ISPC=ispc
 #ISPCFLAGS=-O2 --target=sse4-i32x8 --arch=x86-64
@@ -67,6 +85,10 @@ ifeq ($(COMPILE_ISPC),1)
 MYFLAGS := $(MYFLAGS) -DCOMPILE_ISPC 
 LIBRARY := $(LIBRARY) $(TASKSYS_LIB)
 endif
+
+ifeq ($(COMPILE_CUDA),1)
+MYFLAGS := $(MYFLAGS) -DCOMPILE_CUDA
+endif
 # LIBRARY = -ls3 -lcurl -lxml2
 
 # --------------------------------------------------------------------------
@@ -84,7 +106,22 @@ $(BUILD)/obj/%.o: src/%.cpp
 	$(VERBOSE_SHOW) g++ $(CFLAGS) $(MYFLAGS) -o $@ -c $<
 
 # --------------------------------------------------------------------------
-# Compile target patterns
+# CUDA Rules
+ifeq ($(COMPILE_CUDA),1)
+
+$(BUILD)/obj/%.o: src/%.cu
+	$(QUIET_ECHO) $@: Compiling object
+	@ mkdir -p $(dir $@)
+	$(VERBOSE_SHOW)	$(NVCC) $< $(NVCCFLAGS) -c -o $@
+
+CUDA_SRC = $(wildcard src/*/*.cu src/*.cu)
+CUDA_OBJS = $(patsubst src/%.cu, $(BUILD)/obj/%.o, $(CUDA_SRC))
+else
+CUDA_OBJS :=
+endif
+
+# --------------------------------------------------------------------------
+# ISPC Rules
 ifeq ($(COMPILE_ISPC),1)
 $(BUILD)/obj/operations/matrixOp.o: src/operations/matrixOp.cpp $(BUILD)/obj/operations/matrixOpISPC.h
 	$(QUIET_ECHO) $@: Compiling object
@@ -132,10 +169,10 @@ tinyml : $(BUILD)/bin/tinyml
 SRC = $(wildcard src/*/*.cpp src/*.cpp)
 TINYML_OBJS = $(patsubst src/%.cpp, $(BUILD)/obj/%.o, $(SRC))
 
-$(BUILD)/bin/tinyml: $(TINYML_OBJS) $(ISPC_OBJS) $(TASKSYS_OBJ)
+$(BUILD)/bin/tinyml: $(TINYML_OBJS) $(ISPC_OBJS) $(TASKSYS_OBJ) $(CUDA_OBJS)
 	$(QUIET_ECHO) $@: Building executable
 	@ mkdir -p $(dir $@)
-	$(VERBOSE_SHOW) g++ -o $@ $^ $(LDFLAGS) $(LIBRARY) 
+	g++ -o $@ $^ $(LDFLAGS) $(CUDALDFLAGS) $(CUDALDLIBS) $(LIBRARY) 
 
 # --------------------------------------------------------------------------
 # Clean target
